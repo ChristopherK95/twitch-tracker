@@ -5,6 +5,7 @@
 }
 
 .watchlist .search-row {
+  position: relative;
   margin: 14px 0 20px;
 }
 .watchlist .search-row input {
@@ -20,6 +21,37 @@
 .watchlist .search-row input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+.watchlist .search-row input:disabled {
+  opacity: 0.6;
+}
+.watchlist .search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  z-index: 5;
+}
+.watchlist .search-hit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.watchlist .search-hit:hover {
+  background: var(--surface-2);
+}
+.watchlist .search-hit .avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 0.65rem;
 }
 
 .watchlist h2.section-heading {

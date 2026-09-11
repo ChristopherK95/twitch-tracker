@@ -1,24 +1,6 @@
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useRef, useState } from "react";
+import { commands, type ChannelSearchResult, type WatchlistEntry } from "../../lib/tauri";
 import "./Watchlist.css";
-
-/**
- * Mirrors src-tauri/src/commands.rs::WatchlistEntry. Live fields are mocked until
- * milestone 3's polling scheduler exists — see mock_live_state.rs.
- */
-interface WatchlistEntry {
-  user_id: number;
-  login: string;
-  display_name: string;
-  profile_image_url: string | null;
-  click_count: number;
-  last_live_at: number | null;
-  is_live: boolean;
-  category: string | null;
-  title: string | null;
-  view_count: number | null;
-  started_at: number | null;
-}
 
 function initials(name: string): string {
   return name.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase();
@@ -43,15 +25,50 @@ function formatLastLive(lastLiveAt: number | null): string {
   return `last live ${days} days ago`;
 }
 
-export function Watchlist() {
+interface WatchlistProps {
+  canSearch: boolean;
+  onStreamerAdded: () => void;
+}
+
+export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
   const [entries, setEntries] = useState<WatchlistEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<ChannelSearchResult[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    invoke<WatchlistEntry[]>("get_watchlist")
-      .then(setEntries)
-      .catch((e) => setError(String(e)));
+    commands.getWatchlist().then(setEntries).catch((e) => setError(String(e)));
   }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!canSearch || query.trim().length === 0) {
+      setResults([]);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      commands
+        .searchChannels(query.trim())
+        .then(setResults)
+        .catch((e) => setError(String(e)));
+    }, 250);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, canSearch]);
+
+  async function addStreamer(result: ChannelSearchResult) {
+    await commands.addWatchedStreamer({
+      user_id: result.user_id,
+      login: result.login,
+      display_name: result.display_name,
+      profile_image_url: result.thumbnail_url || null,
+    });
+    setQuery("");
+    setResults([]);
+    onStreamerAdded();
+  }
 
   const live = entries.filter((e) => e.is_live);
   const offline = entries.filter((e) => !e.is_live);
@@ -59,10 +76,30 @@ export function Watchlist() {
   return (
     <div className="watchlist">
       <div className="search-row">
-        <input type="text" placeholder="Search for a streamer to track…" disabled />
+        <input
+          type="text"
+          placeholder={
+            canSearch ? "Search for a streamer to track…" : "Connect your Twitch account to search"
+          }
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          disabled={!canSearch}
+        />
+        {results.length > 0 && (
+          <div className="search-results">
+            {results.map((r) => (
+              <div className="search-hit" key={r.user_id} onClick={() => addStreamer(r)}>
+                <div className="avatar" style={{ background: `hsl(${hueFor(r.user_id)} 55% 46%)` }}>
+                  {initials(r.display_name)}
+                </div>
+                <span>{r.display_name}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {error && <p className="row-faint">Couldn't load your Watchlist: {error}</p>}
+      {error && <p className="row-faint">{error}</p>}
 
       <h2 className="section-heading">Live now — {live.length}</h2>
       {live.map((s) => (
