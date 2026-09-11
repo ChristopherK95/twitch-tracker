@@ -1,0 +1,48 @@
+/*
+ * TwitchTrack visual identity — "Stream Violet".
+ * Source of record: .scratch/twitchtrack-v1-spec/issues/09-visual-identity-prototype.md
+ * Dark-first; light palette derived from the same tokens (not yet used anywhere but Settings
+ * doesn't expose a theme toggle in v1 — the app follows the OS scheme).
+ */
+
+:root {
+  --bg: #faf9fc;
+  --surface: #ffffff;
+  --surface-2: #f1eef7;
+  --surface-3: #e7e2f3;
+  --text-high: #1d1a29;
+  --text-muted: #6f6790;
+  --text-faint: #9b92b8;
+  --accent: #6a4fe0;
+  --accent-ink: #ffffff;
+  --live: #1e9e5a;
+  --live-ink: #ffffff;
+  --warn: #b5620a;
+  --warn-bg: #fcebd8;
+  --border: #e3dfee;
+  --shadow: 0 1px 2px rgba(29, 26, 41, 0.06), 0 8px 24px rgba(29, 26, 41, 0.08);
+
+  --font-display: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #14121b;
+    --surface: #1d1a29;
+    --surface-2: #262238;
+    --surface-3: #322c47;
+    --text-high: #f1eefa;
+    --text-muted: #9b92b8;
+    --text-faint: #6f6790;
+    --accent: #8b7cff;
+    --accent-ink: #14121b;
+    --live: #33d17a;
+    --live-ink: #0b2015;
+    --warn: #f0a94e;
+    --warn-bg: #3a2a12;
+    --border: #322c47;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+}
