@@ -19,3 +19,11 @@ pub fn list(conn: &Connection) -> rusqlite::Result<Vec<WatchedStreamerRow>> {
     })?;
     rows.collect()
 }
+
+pub fn set_last_live_at(conn: &Connection, user_id: i64, at: i64) -> rusqlite::Result<()> {
+    conn.execute(
+        "UPDATE watched_streamers SET last_live_at = ?1 WHERE user_id = ?2",
+        rusqlite::params![at, user_id],
+    )?;
+    Ok(())
+}

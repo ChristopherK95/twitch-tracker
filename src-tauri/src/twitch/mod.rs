@@ -47,7 +47,13 @@ pub struct StreamInfo {
     pub title: String,
     pub view_count: i64,
     pub started_at: i64, // unix epoch seconds
+    pub thumbnail_url: String,
 }
+
+/// Stream preview size per the settled "static thumbnail" decision — big enough to look
+/// sharp in the Watchlist row, small enough to stay cheap to refresh every poll.
+const THUMBNAIL_WIDTH: u32 = 320;
+const THUMBNAIL_HEIGHT: u32 = 180;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ChannelSearchResult {
@@ -174,7 +180,8 @@ pub async fn get_streams(
         game_name: String,
         title: String,
         viewer_count: i64,
-        started_at: String, // RFC3339
+        started_at: String,   // RFC3339
+        thumbnail_url: String, // template with {width}/{height} placeholders
     }
 
     let id_params: Vec<(&str, String)> = user_ids
@@ -195,6 +202,10 @@ pub async fn get_streams(
                 title: r.title,
                 view_count: r.viewer_count,
                 started_at: chrono_parse_rfc3339(&r.started_at)?,
+                thumbnail_url: r
+                    .thumbnail_url
+                    .replace("{width}", &THUMBNAIL_WIDTH.to_string())
+                    .replace("{height}", &THUMBNAIL_HEIGHT.to_string()),
             })
         })
         .collect())

@@ -28,18 +28,26 @@ function formatLastLive(lastLiveAt: number | null): string {
 interface WatchlistProps {
   canSearch: boolean;
   onStreamerAdded: () => void;
+  highlightUserId: number | null;
+  refreshSignal: number;
 }
 
-export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
+export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refreshSignal }: WatchlistProps) {
   const [entries, setEntries] = useState<WatchlistEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ChannelSearchResult[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rowRefs = useRef(new Map<number, HTMLDivElement>());
 
   useEffect(() => {
     commands.getWatchlist().then(setEntries).catch((e) => setError(String(e)));
-  }, []);
+  }, [refreshSignal]);
+
+  useEffect(() => {
+    if (highlightUserId === null) return;
+    rowRefs.current.get(highlightUserId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [entries, highlightUserId]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -70,6 +78,12 @@ export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
     onStreamerAdded();
   }
 
+  async function openStream(userId: number, login: string) {
+    await commands.openStream(userId, login);
+    // click_count changed, which affects live-ranking order — refresh to reflect it.
+    commands.getWatchlist().then(setEntries).catch((e) => setError(String(e)));
+  }
+
   const live = entries.filter((e) => e.is_live);
   const offline = entries.filter((e) => !e.is_live);
 
@@ -89,9 +103,7 @@ export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
           <div className="search-results">
             {results.map((r) => (
               <div className="search-hit" key={r.user_id} onClick={() => addStreamer(r)}>
-                <div className="avatar" style={{ background: `hsl(${hueFor(r.user_id)} 55% 46%)` }}>
-                  {initials(r.display_name)}
-                </div>
+                <Avatar userId={r.user_id} displayName={r.display_name} imageUrl={r.thumbnail_url || null} />
                 <span>{r.display_name}</span>
               </div>
             ))}
@@ -103,13 +115,33 @@ export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
 
       <h2 className="section-heading">Live now — {live.length}</h2>
       {live.map((s) => (
-        <div className="row" key={s.user_id}>
+        <div
+          className={`row ${s.user_id === highlightUserId ? "row--highlighted" : ""}`}
+          key={s.user_id}
+          ref={(el) => {
+            if (el) rowRefs.current.set(s.user_id, el);
+            else rowRefs.current.delete(s.user_id);
+          }}
+        >
           <div className="thumb">
+            {s.stream_thumbnail_url && (
+              <img
+                src={s.stream_thumbnail_url}
+                alt=""
+                className="thumb-img"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            )}
             <div className="viewers-chip">{s.view_count?.toLocaleString("en-US")}</div>
           </div>
           <div className="row-main">
             <div className="row-top">
-              <button className="name-btn">{s.display_name}</button>
+              <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} small />
+              <button className="name-btn" onClick={() => openStream(s.user_id, s.login)}>
+                {s.display_name}
+              </button>
               <span className="category-pill">{s.category}</span>
             </div>
             <div className="row-title">{s.title}</div>
@@ -122,18 +154,50 @@ export function Watchlist({ canSearch, onStreamerAdded }: WatchlistProps) {
 
       <h2 className="section-heading">Offline — {offline.length}</h2>
       {offline.map((s) => (
-        <div className="row" key={s.user_id}>
-          <div className="avatar" style={{ background: `hsl(${hueFor(s.user_id)} 55% 46%)` }}>
-            {initials(s.display_name)}
-          </div>
+        <div
+          className={`row ${s.user_id === highlightUserId ? "row--highlighted" : ""}`}
+          key={s.user_id}
+          ref={(el) => {
+            if (el) rowRefs.current.set(s.user_id, el);
+            else rowRefs.current.delete(s.user_id);
+          }}
+        >
+          <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} />
           <div className="row-main">
             <div className="row-top">
-              <button className="name-btn">{s.display_name}</button>
+              <button className="name-btn" onClick={() => openStream(s.user_id, s.login)}>
+                {s.display_name}
+              </button>
             </div>
             <div className="row-faint">{formatLastLive(s.last_live_at)}</div>
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function Avatar({
+  userId,
+  displayName,
+  imageUrl,
+  small,
+}: {
+  userId: number;
+  displayName: string;
+  imageUrl: string | null;
+  small?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const className = `avatar ${small ? "avatar--small" : ""}`;
+  if (imageUrl && !failed) {
+    return (
+      <img src={imageUrl} alt="" className={`${className} avatar-img`} onError={() => setFailed(true)} />
+    );
+  }
+  return (
+    <div className={className} style={{ background: `hsl(${hueFor(userId)} 55% 46%)` }}>
+      {initials(displayName)}
     </div>
   );
 }

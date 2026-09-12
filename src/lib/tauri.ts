@@ -25,6 +25,7 @@ export interface WatchlistEntry {
   title: string | null;
   view_count: number | null;
   started_at: number | null;
+  stream_thumbnail_url: string | null;
 }
 
 /** Mirrors src-tauri/src/twitch/mod.rs::ChannelSearchResult. */
@@ -35,8 +36,27 @@ export interface ChannelSearchResult {
   thumbnail_url: string;
 }
 
+/** Mirrors src-tauri/src/db/notifications.rs::NotificationRow. */
+export interface NotificationRow {
+  id: number;
+  event_type: "go_live" | "go_offline" | "metadata_change";
+  streamer_user_id: number;
+  streamer_login: string;
+  streamer_display_name: string;
+  created_at: number;
+  category: string | null;
+  title: string | null;
+  duration_seconds: number | null;
+  old_title: string | null;
+  new_title: string | null;
+  old_category: string | null;
+  new_category: string | null;
+}
+
 export const commands = {
   getWatchlist: () => invoke<WatchlistEntry[]>("get_watchlist"),
+  getNotifications: () => invoke<NotificationRow[]>("get_notifications"),
+  clearNotifications: () => invoke<void>("clear_notifications"),
   getAuthStatus: () => invoke<AuthStatus>("get_auth_status"),
   startConnectFlow: () => invoke<ConnectStarted>("start_connect_flow"),
   disconnect: () => invoke<void>("disconnect"),
@@ -56,10 +76,24 @@ export const commands = {
       displayName: streamer.display_name,
       profileImageUrl: streamer.profile_image_url,
     }),
+  openStream: (userId: number, login: string) =>
+    invoke<void>("open_stream", { userId, login }),
 };
 
 export function onAuthStatusChanged(
   handler: (status: AuthStatus) => void,
 ): Promise<UnlistenFn> {
   return listen<AuthStatus>("auth-status-changed", (event) => handler(event.payload));
+}
+
+/** Fires whenever the scheduler writes a Notification; payload is the streamer's user_id. */
+export function onNotificationCreated(
+  handler: (userId: number) => void,
+): Promise<UnlistenFn> {
+  return listen<number>("notification-created", (event) => handler(event.payload));
+}
+
+/** Fires every scheduler tick (~20s) — view counts etc. change even with no Notification. */
+export function onLiveStateUpdated(handler: () => void): Promise<UnlistenFn> {
+  return listen("live-state-updated", () => handler());
 }

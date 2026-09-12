@@ -1,12 +1,13 @@
 use crate::auth::{self, AuthState, AuthStatus, StoredToken};
-use crate::db::{watchlist, Db};
+use crate::db::{notifications, watchlist, Db};
+use crate::live_cache::{LiveCache, LiveEntry};
 use crate::twitch;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, State};
 
 /// Combined view model the frontend renders — durable identity (DB) plus live state
-/// (a real one-shot Get Streams call when connected; empty when not — the continuous
-/// polling scheduler that keeps this fresh automatically lands in milestone 3).
+/// (read from the scheduler's in-memory cache, kept fresh every ~20s poll; see
+/// scheduler.rs — this command never talks to Twitch itself).
 #[derive(Debug, Clone, Serialize)]
 pub struct WatchlistEntry {
     pub user_id: i64,
@@ -20,32 +21,21 @@ pub struct WatchlistEntry {
     pub title: Option<String>,
     pub view_count: Option<i64>,
     pub started_at: Option<i64>,
+    pub stream_thumbnail_url: Option<String>,
 }
 
 #[tauri::command]
-pub async fn get_watchlist(
-    db: State<'_, Db>,
-    http: State<'_, reqwest::Client>,
-) -> Result<Vec<WatchlistEntry>, String> {
+pub fn get_watchlist(db: State<'_, Db>, cache: State<'_, LiveCache>) -> Result<Vec<WatchlistEntry>, String> {
     let rows = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         watchlist::list(&conn).map_err(|e| e.to_string())?
     };
-
-    let live = match auth::get_valid_access_token(&http).await {
-        Ok(token) => {
-            let ids: Vec<i64> = rows.iter().map(|r| r.user_id).collect();
-            twitch::get_streams(&http, &token, &ids)
-                .await
-                .map_err(|e| e.to_string())?
-        }
-        Err(_) => vec![], // not connected yet — everyone reads as offline
-    };
+    let live = cache.snapshot();
 
     let mut entries: Vec<WatchlistEntry> = rows
         .into_iter()
         .map(|r| {
-            let live_state = live.iter().find(|s| s.user_id == r.user_id);
+            let live_state = live.get(&r.user_id);
             WatchlistEntry {
                 user_id: r.user_id,
                 login: r.login,
@@ -58,6 +48,7 @@ pub async fn get_watchlist(
                 title: live_state.map(|s| s.title.clone()),
                 view_count: live_state.map(|s| s.view_count),
                 started_at: live_state.map(|s| s.started_at),
+                stream_thumbnail_url: live_state.map(|s| s.thumbnail_url.clone()),
             }
         })
         .collect();
@@ -78,6 +69,19 @@ pub async fn get_watchlist(
     });
 
     Ok(entries)
+}
+
+#[tauri::command]
+pub fn get_notifications(db: State<'_, Db>) -> Result<Vec<notifications::NotificationRow>, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    notifications::list(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn clear_notifications(db: State<'_, Db>) -> Result<(), String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    notifications::clear_all(&conn).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -205,29 +209,73 @@ pub async fn search_channels(
 }
 
 #[tauri::command]
-pub fn add_watched_streamer(
+pub async fn add_watched_streamer(
     db: State<'_, Db>,
+    http: State<'_, reqwest::Client>,
+    cache: State<'_, LiveCache>,
     user_id: i64,
     login: String,
     display_name: String,
     profile_image_url: Option<String>,
 ) -> Result<(), String> {
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_secs() as i64;
-    conn.execute(
-        "INSERT OR IGNORE INTO watched_streamers (user_id, login, display_name, profile_image_url, added_at, click_count)
-         VALUES (?1, ?2, ?3, ?4, ?5, 0)",
-        rusqlite::params![user_id, login, display_name, profile_image_url, now],
-    )
-    .map_err(|e| e.to_string())?;
-    if conn.changes() == 0 {
-        eprintln!(
-            "add_watched_streamer: no row inserted for user_id={user_id} login={login} — \
-             a row with that user_id already exists (INSERT OR IGNORE no-op)"
-        );
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
+        conn.execute(
+            "INSERT OR IGNORE INTO watched_streamers (user_id, login, display_name, profile_image_url, added_at, click_count)
+             VALUES (?1, ?2, ?3, ?4, ?5, 0)",
+            rusqlite::params![user_id, login, display_name, profile_image_url, now],
+        )
+        .map_err(|e| e.to_string())?;
+        if conn.changes() == 0 {
+            eprintln!(
+                "add_watched_streamer: no row inserted for user_id={user_id} login={login} — \
+                 a row with that user_id already exists (INSERT OR IGNORE no-op)"
+            );
+        }
     }
+
+    // Instant one-off live check for just this streamer, so the Watchlist shows their
+    // real status right away instead of waiting for the scheduler's next ~20s tick.
+    // The scheduler's own next tick still handles Go-Live detection/logging normally —
+    // this only updates what's displayed in the meantime.
+    if let Ok(token) = auth::get_valid_access_token(&http).await {
+        if let Ok(streams) = twitch::get_streams(&http, &token, &[user_id]).await {
+            let live_entry = streams.into_iter().next().map(|s| LiveEntry {
+                category: s.category,
+                title: s.title,
+                view_count: s.view_count,
+                started_at: s.started_at,
+                thumbnail_url: s.thumbnail_url,
+            });
+            cache.upsert_one(user_id, live_entry);
+        }
+    }
+
+    Ok(())
+}
+
+/// Clicking a Watched Streamer's name: opens their channel in the OS default browser
+/// and increments click_count (used for the Watchlist's live-ranking order).
+#[tauri::command]
+pub fn open_stream(app: AppHandle, db: State<'_, Db>, user_id: i64, login: String) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            "UPDATE watched_streamers SET click_count = click_count + 1 WHERE user_id = ?1",
+            rusqlite::params![user_id],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    app.opener()
+        .open_url(format!("https://twitch.tv/{login}"), None::<&str>)
+        .map_err(|e| e.to_string())?;
+
     Ok(())
 }

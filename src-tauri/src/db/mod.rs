@@ -3,6 +3,8 @@ use std::path::Path;
 use std::sync::Mutex;
 
 pub mod models;
+pub mod notifications;
+pub mod settings;
 pub mod watchlist;
 
 /// Shared handle to the app's single SQLite connection. Guarded by a mutex since the

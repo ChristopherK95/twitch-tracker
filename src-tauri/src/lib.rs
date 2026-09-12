@@ -1,10 +1,13 @@
 mod auth;
 mod commands;
 mod db;
+mod live_cache;
+mod scheduler;
 mod twitch;
 
 use auth::AuthState;
 use db::Db;
+use live_cache::LiveCache;
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -12,6 +15,7 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let app_data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&app_data_dir)?;
@@ -22,6 +26,7 @@ pub fn run() {
             app.manage(Db(Mutex::new(conn)));
             app.manage(reqwest::Client::new());
             app.manage(AuthState::initial());
+            app.manage(LiveCache::default());
 
             // If a token is already stored (from a previous run), resolve real auth
             // status in the background rather than blocking startup on a network call.
@@ -30,15 +35,20 @@ pub fn run() {
                 resolve_stored_auth_on_startup(handle).await;
             });
 
+            scheduler::spawn(app.handle().clone());
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_watchlist,
+            commands::get_notifications,
+            commands::clear_notifications,
             commands::get_auth_status,
             commands::start_connect_flow,
             commands::disconnect,
             commands::search_channels,
             commands::add_watched_streamer,
+            commands::open_stream,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
