@@ -154,9 +154,20 @@ async fn tick_once(
     suppress_notifications: bool,
 ) -> Result<(), TickError> {
     let http = app.state::<reqwest::Client>();
-    let token = auth::get_valid_access_token(&http)
-        .await
-        .map_err(|_| TickError::NotConnected)?;
+    let token = match auth::get_valid_access_token(&http).await {
+        Ok(t) => t,
+        Err(auth::TokenError::NeverConnected) => return Err(TickError::NotConnected),
+        Err(auth::TokenError::RefreshFailed(e)) => {
+            eprintln!("scheduler: token refresh failed, disconnecting: {e}");
+            auth::set_disconnected(app);
+            send_desktop_notification(
+                app,
+                "TwitchTrack disconnected from Twitch",
+                "Reconnect in Settings to keep tracking your Watchlist.",
+            );
+            return Err(TickError::NotConnected);
+        }
+    };
 
     let db = app.state::<Db>();
     let rows = {

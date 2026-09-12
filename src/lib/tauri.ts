@@ -53,6 +53,17 @@ export interface NotificationRow {
   new_category: string | null;
 }
 
+/** Mirrors src-tauri/src/db/settings.rs::SettingsRow. */
+export interface SettingsRow {
+  notify_go_live: boolean;
+  notify_go_offline: boolean;
+  notify_metadata_change: boolean;
+  start_on_login: boolean;
+  twitch_login: string | null;
+}
+
+export type NotificationKind = "go_live" | "go_offline" | "metadata_change";
+
 export const commands = {
   getWatchlist: () => invoke<WatchlistEntry[]>("get_watchlist"),
   getNotifications: () => invoke<NotificationRow[]>("get_notifications"),
@@ -78,6 +89,10 @@ export const commands = {
     }),
   openStream: (userId: number, login: string) =>
     invoke<void>("open_stream", { userId, login }),
+  getSettings: () => invoke<SettingsRow>("get_settings"),
+  setNotificationToggle: (kind: NotificationKind, enabled: boolean) =>
+    invoke<void>("set_notification_toggle", { kind, enabled }),
+  setStartOnLogin: (enabled: boolean) => invoke<void>("set_start_on_login", { enabled }),
 };
 
 export function onAuthStatusChanged(

@@ -1,5 +1,5 @@
 use crate::auth::{self, AuthState, AuthStatus, StoredToken};
-use crate::db::{notifications, watchlist, Db};
+use crate::db::{notifications, settings, watchlist, Db};
 use crate::live_cache::{LiveCache, LiveEntry};
 use crate::twitch;
 use serde::Serialize;
@@ -187,11 +187,8 @@ async fn poll_until_resolved(app: AppHandle, http: reqwest::Client, device: twit
 }
 
 #[tauri::command]
-pub fn disconnect(app: AppHandle, auth_state: State<'_, AuthState>) -> Result<(), String> {
-    auth::clear().map_err(|e| e.to_string())?;
-    let status = AuthStatus::Disconnected;
-    *auth_state.0.lock().map_err(|e| e.to_string())? = status.clone();
-    let _ = app.emit("auth-status-changed", &status);
+pub fn disconnect(app: AppHandle) -> Result<(), String> {
+    auth::set_disconnected(&app);
     Ok(())
 }
 
@@ -277,5 +274,41 @@ pub fn open_stream(app: AppHandle, db: State<'_, Db>, user_id: i64, login: Strin
         .open_url(format!("https://twitch.tv/{login}"), None::<&str>)
         .map_err(|e| e.to_string())?;
 
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_settings(db: State<'_, Db>) -> Result<settings::SettingsRow, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    settings::get(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn set_notification_toggle(db: State<'_, Db>, kind: String, enabled: bool) -> Result<(), String> {
+    let parsed = match kind.as_str() {
+        "go_live" => settings::NotificationKind::GoLive,
+        "go_offline" => settings::NotificationKind::GoOffline,
+        "metadata_change" => settings::NotificationKind::MetadataChange,
+        other => return Err(format!("unknown notification kind: {other}")),
+    };
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    settings::set_notification_toggle(&conn, parsed, enabled).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn set_start_on_login(app: AppHandle, db: State<'_, Db>, enabled: bool) -> Result<(), String> {
+    use tauri_plugin_autostart::ManagerExt;
+
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        settings::set_start_on_login(&conn, enabled).map_err(|e| e.to_string())?;
+    }
+
+    let autostart = app.autolaunch();
+    if enabled {
+        autostart.enable().map_err(|e| e.to_string())?;
+    } else {
+        autostart.disable().map_err(|e| e.to_string())?;
+    }
     Ok(())
 }

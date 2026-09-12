@@ -4,13 +4,13 @@ import { commands } from "../lib/tauri";
 import "./ConnectBanner.css";
 
 /**
- * Temporary, minimal stand-in for the real "Connect your Twitch account" UI —
- * the actual chosen design lives in the Settings "Card Dashboard"
- * (.scratch/twitchtrack-v1-spec/issues/06-settings-lifecycle-prototype.md) and
- * a proper Settings view lands in milestone 4. This exists now purely so
- * milestone 2's auth flow is reachable/testable.
+ * Persistent reminder shown whenever not connected (App.tsx only renders this outside
+ * the "connected" state) — one of the three disconnected-state surfaces from
+ * .scratch/twitchtrack-v1-spec/issues/04-error-handling.md (alongside the tray tooltip
+ * and the one-time desktop notification). Full account management lives in Settings
+ * ("Card Dashboard", issues/06-settings-lifecycle-prototype.md).
  */
-export function ConnectBanner({ status }: { status: AuthStatus }) {
+export function ConnectBanner({ status }: { status: Exclude<AuthStatus, { status: "connected" }> }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,21 +24,6 @@ export function ConnectBanner({ status }: { status: AuthStatus }) {
     } finally {
       setBusy(false);
     }
-  }
-
-  async function disconnect() {
-    await commands.disconnect();
-  }
-
-  if (status.status === "connected") {
-    return (
-      <div className="connect-banner connect-banner--connected">
-        <span>Connected as <b>{status.login}</b></span>
-        <button className="link-btn" onClick={disconnect}>
-          Disconnect
-        </button>
-      </div>
-    );
   }
 
   if (status.status === "connecting") {

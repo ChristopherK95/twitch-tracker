@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Watchlist } from "./views/Watchlist/Watchlist";
 import { NotificationLog } from "./views/NotificationLog/NotificationLog";
+import { Settings } from "./views/Settings/Settings";
 import { ConnectBanner } from "./views/ConnectBanner";
 import { PollTimer } from "./components/PollTimer";
 import {
@@ -13,9 +14,7 @@ import {
 import "./theme/tokens.css";
 import "./App.css";
 
-// Temporary top-level nav — a proper Settings/nav shell lands in milestone 4/5;
-// this just makes the Notification Log reachable in the meantime.
-type View = "watchlist" | "notifications";
+type View = "watchlist" | "notifications" | "settings";
 
 function App() {
   const [authStatus, setAuthStatus] = useState<AuthStatus>({ status: "disconnected" });
@@ -57,20 +56,25 @@ function App() {
           <button className={view === "notifications" ? "active" : ""} onClick={() => setView("notifications")}>
             Notifications
           </button>
+          <button className={view === "settings" ? "active" : ""} onClick={() => setView("settings")}>
+            Settings
+          </button>
         </nav>
         <PollTimer />
       </div>
-      <ConnectBanner status={authStatus} />
-      {view === "watchlist" ? (
+      {authStatus.status !== "connected" && <ConnectBanner status={authStatus} />}
+      {view === "watchlist" && (
         <Watchlist
           refreshSignal={refreshSignal}
           canSearch={authStatus.status === "connected"}
           onStreamerAdded={() => setRefreshSignal((k) => k + 1)}
           highlightUserId={highlightUserId}
         />
-      ) : (
+      )}
+      {view === "notifications" && (
         <NotificationLog refreshSignal={refreshSignal} highlightUserId={highlightUserId} />
       )}
+      {view === "settings" && <Settings authStatus={authStatus} />}
     </main>
   );
 }

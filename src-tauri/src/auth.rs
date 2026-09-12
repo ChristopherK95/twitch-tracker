@@ -94,16 +94,54 @@ impl AuthState {
     }
 }
 
+/// Distinguishes "nothing has ever been connected" (routine, no user action needed) from
+/// "a token existed but refreshing it just failed" (the one case ticket 04 says should
+/// actually surface to the user — tray badge, one desktop notification, in-app banner).
+#[derive(Debug)]
+pub enum TokenError {
+    NeverConnected,
+    RefreshFailed(anyhow::Error),
+}
+
+impl std::fmt::Display for TokenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TokenError::NeverConnected => write!(f, "not connected"),
+            TokenError::RefreshFailed(e) => write!(f, "token refresh failed: {e}"),
+        }
+    }
+}
+impl std::error::Error for TokenError {}
+
 /// Returns a currently-valid access token, refreshing (and re-persisting) it first if
-/// it's within the proactive-refresh window. Errors if nothing is connected.
-pub async fn get_valid_access_token(http: &reqwest::Client) -> anyhow::Result<String> {
-    let mut token = load().ok_or_else(|| anyhow::anyhow!("not connected"))?;
+/// it's within the proactive-refresh window.
+pub async fn get_valid_access_token(http: &reqwest::Client) -> Result<String, TokenError> {
+    let mut token = load().ok_or(TokenError::NeverConnected)?;
     if token.needs_refresh() {
-        let refreshed = crate::twitch::refresh_token(http, &token.refresh_token).await?;
+        let refreshed = crate::twitch::refresh_token(http, &token.refresh_token)
+            .await
+            .map_err(TokenError::RefreshFailed)?;
         token = StoredToken::from_token_response(refreshed);
-        save(&token)?;
+        save(&token).map_err(TokenError::RefreshFailed)?;
     }
     Ok(token.access_token)
+}
+
+/// Shared disconnect transition — used both by the user clicking "Disconnect" and by
+/// the scheduler detecting a genuine refresh failure. Always clears the token, flips
+/// AuthState, emits the event, and updates the tray's disconnected indicator; the one
+/// desktop notification for the *unexpected* case is sent by the caller, not here.
+pub fn set_disconnected(app: &tauri::AppHandle) {
+    use tauri::Manager;
+    let _ = clear();
+    let status = AuthStatus::Disconnected;
+    if let Some(state) = app.try_state::<AuthState>() {
+        if let Ok(mut guard) = state.0.lock() {
+            *guard = status.clone();
+        }
+    }
+    let _ = tauri::Emitter::emit(app, "auth-status-changed", &status);
+    crate::tray::set_disconnected_indicator(app, true);
 }
 
 fn now_unix() -> i64 {
