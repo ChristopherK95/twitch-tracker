@@ -16,6 +16,7 @@ pub struct Db(pub Mutex<Connection>);
 const MIGRATIONS: &[(i64, &str)] = &[
     (1, include_str!("../../migrations/0001_init.sql")),
     (2, include_str!("../../migrations/0002_tray_explainer.sql")),
+    (3, include_str!("../../migrations/0003_twitch_profile_image.sql")),
 ];
 
 pub fn open(db_path: &Path) -> rusqlite::Result<Connection> {

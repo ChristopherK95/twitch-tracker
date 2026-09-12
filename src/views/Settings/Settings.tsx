@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { commands, type AuthStatus, type NotificationKind, type SettingsRow } from "../../lib/tauri";
+import { commands, openInBrowser, type AuthStatus, type NotificationKind, type SettingsRow } from "../../lib/tauri";
 import "./Settings.css";
 
 interface SettingsProps {
@@ -45,7 +45,11 @@ export function Settings({ authStatus }: SettingsProps) {
           <h2 className="section-heading">Account</h2>
           {authStatus.status === "connected" && (
             <div className="account-row">
-              <div className="avatar">{authStatus.login.slice(0, 2).toUpperCase()}</div>
+              {settings?.twitch_profile_image_url ? (
+                <img className="avatar avatar--img" src={settings.twitch_profile_image_url} alt="" />
+              ) : (
+                <div className="avatar">{authStatus.login.slice(0, 2).toUpperCase()}</div>
+              )}
               <div style={{ flex: 1 }}>
                 <div className="field-label">Connected as {authStatus.login}</div>
                 <div className="status-line">
@@ -62,7 +66,11 @@ export function Settings({ authStatus }: SettingsProps) {
             <>
               <div className="field-label">Connecting…</div>
               <div className="field-desc">
-                Go to <b>{authStatus.verification_uri}</b> and enter this code:
+                Go to{" "}
+                <button className="link-btn" onClick={() => openInBrowser(authStatus.verification_uri)}>
+                  {authStatus.verification_uri}
+                </button>{" "}
+                and confirm this code:
               </div>
               <div className="code-box">{authStatus.user_code}</div>
               <div className="field-desc">Waiting for approval…</div>

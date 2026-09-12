@@ -162,9 +162,11 @@ async fn poll_until_resolved(app: AppHandle, http: reqwest::Client, device: twit
                 };
                 let db_state: State<'_, Db> = app.state();
                 if let Ok(conn) = db_state.0.lock() {
-                    let _ = conn.execute(
-                        "UPDATE settings SET twitch_user_id = ?1, twitch_login = ?2 WHERE id = 1",
-                        rusqlite::params![me.user_id.to_string(), me.login],
+                    let _ = crate::db::settings::set_twitch_identity(
+                        &conn,
+                        &me.user_id.to_string(),
+                        &me.login,
+                        &me.profile_image_url,
                     );
                 }
                 let status = AuthStatus::Connected {
@@ -240,7 +242,7 @@ pub async fn add_watched_streamer(
     // The scheduler's own next tick still handles Go-Live detection/logging normally —
     // this only updates what's displayed in the meantime.
     if let Ok(token) = auth::get_valid_access_token(&http).await {
-        if let Ok(streams) = twitch::get_streams(&http, &token, &[user_id]).await {
+        let is_live = if let Ok(streams) = twitch::get_streams(&http, &token, &[user_id]).await {
             let live_entry = streams.into_iter().next().map(|s| LiveEntry {
                 category: s.category,
                 title: s.title,
@@ -248,7 +250,26 @@ pub async fn add_watched_streamer(
                 started_at: s.started_at,
                 thumbnail_url: s.thumbnail_url,
             });
+            let is_live = live_entry.is_some();
             cache.upsert_one(user_id, live_entry);
+            is_live
+        } else {
+            false
+        };
+
+        // Offline and we have no local last-live history for them (a fresh add, or one
+        // whose history predates this row) — best-effort backfill from their most recent
+        // VOD. Twitch has no authoritative "last live" field; this legitimately comes back
+        // empty for plenty of channels (see twitch::get_last_broadcast_at), which is fine —
+        // it just leaves last_live_at as-is ("not yet live") rather than making anything up.
+        if !is_live {
+            if let Ok(Some(last_live_at)) = twitch::get_last_broadcast_at(&http, &token, user_id).await {
+                let conn = db.0.lock().map_err(|e| e.to_string())?;
+                let _ = conn.execute(
+                    "UPDATE watched_streamers SET last_live_at = ?1 WHERE user_id = ?2 AND last_live_at IS NULL",
+                    rusqlite::params![last_live_at, user_id],
+                );
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { AuthStatus } from "../lib/tauri";
-import { commands } from "../lib/tauri";
+import { commands, openInBrowser } from "../lib/tauri";
 import "./ConnectBanner.css";
 
 /**
@@ -30,7 +30,11 @@ export function ConnectBanner({ status }: { status: Exclude<AuthStatus, { status
     return (
       <div className="connect-banner">
         <div>
-          Go to <b>{status.verification_uri}</b> and enter this code:
+          Go to{" "}
+          <button className="link-btn" onClick={() => openInBrowser(status.verification_uri)}>
+            {status.verification_uri}
+          </button>{" "}
+          and confirm this code:
         </div>
         <div className="code-box">{status.user_code}</div>
         <div className="faint">Waiting for approval…</div>

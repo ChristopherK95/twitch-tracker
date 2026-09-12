@@ -32,11 +32,12 @@ pub struct SettingsRow {
     pub notify_metadata_change: bool,
     pub start_on_login: bool,
     pub twitch_login: Option<String>,
+    pub twitch_profile_image_url: Option<String>,
 }
 
 pub fn get(conn: &Connection) -> rusqlite::Result<SettingsRow> {
     conn.query_row(
-        "SELECT notify_go_live, notify_go_offline, notify_metadata_change, start_on_login, twitch_login
+        "SELECT notify_go_live, notify_go_offline, notify_metadata_change, start_on_login, twitch_login, twitch_profile_image_url
          FROM settings WHERE id = 1",
         [],
         |row| {
@@ -46,9 +47,25 @@ pub fn get(conn: &Connection) -> rusqlite::Result<SettingsRow> {
                 notify_metadata_change: row.get::<_, i64>(2)? != 0,
                 start_on_login: row.get::<_, i64>(3)? != 0,
                 twitch_login: row.get(4)?,
+                twitch_profile_image_url: row.get(5)?,
             })
         },
     )
+}
+
+/// Sets both cached display fields for the connected account in one write — called
+/// wherever a connect (or startup re-validation) succeeds.
+pub fn set_twitch_identity(
+    conn: &Connection,
+    twitch_user_id: &str,
+    twitch_login: &str,
+    profile_image_url: &str,
+) -> rusqlite::Result<()> {
+    conn.execute(
+        "UPDATE settings SET twitch_user_id = ?1, twitch_login = ?2, twitch_profile_image_url = ?3 WHERE id = 1",
+        rusqlite::params![twitch_user_id, twitch_login, profile_image_url],
+    )?;
+    Ok(())
 }
 
 pub enum NotificationKind {

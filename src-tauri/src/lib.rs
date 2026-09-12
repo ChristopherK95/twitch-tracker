@@ -129,6 +129,18 @@ async fn resolve_stored_auth_on_startup(app: tauri::AppHandle) {
 
     match twitch::get_self(&http, &token.access_token).await {
         Ok(me) => {
+            {
+                let db = app.state::<Db>();
+                if let Ok(conn) = db.0.lock() {
+                    let _ = db::settings::set_twitch_identity(
+                        &conn,
+                        &me.user_id.to_string(),
+                        &me.login,
+                        &me.profile_image_url,
+                    );
+                };
+            }
+
             let status = auth::AuthStatus::Connected {
                 login: me.login,
                 user_id: me.user_id,
@@ -139,9 +151,46 @@ async fn resolve_stored_auth_on_startup(app: tauri::AppHandle) {
             }
             tray::set_disconnected_indicator(&app, false);
             let _ = app.emit("auth-status-changed", &status);
+
+            backfill_last_live_at(&app, &http, &token.access_token).await;
         }
         Err(e) => {
             eprintln!("startup identity check failed, treating as disconnected: {e}");
+        }
+    }
+}
+
+/// One-time-per-streamer best-effort backfill for any Watched Streamer whose
+/// last_live_at is still unset (e.g. added before this feature existed, or whose local
+/// history was lost some other way) — same VOD-based lookup as the one done when adding
+/// a streamer (see commands::add_watched_streamer), just applied retroactively at startup.
+async fn backfill_last_live_at(app: &tauri::AppHandle, http: &reqwest::Client, access_token: &str) {
+    let db = app.state::<Db>();
+    let ids: Vec<i64> = {
+        let Ok(conn) = db.0.lock() else { return };
+        let Ok(mut stmt) =
+            conn.prepare("SELECT user_id FROM watched_streamers WHERE last_live_at IS NULL")
+        else {
+            return;
+        };
+        let Ok(rows) = stmt.query_map([], |row| row.get::<_, i64>(0)) else {
+            return;
+        };
+        rows.filter_map(Result::ok).collect()
+    };
+
+    for user_id in ids {
+        match twitch::get_last_broadcast_at(http, access_token, user_id).await {
+            Ok(Some(last_live_at)) => {
+                if let Ok(conn) = db.0.lock() {
+                    let _ = conn.execute(
+                        "UPDATE watched_streamers SET last_live_at = ?1 WHERE user_id = ?2 AND last_live_at IS NULL",
+                        rusqlite::params![last_live_at, user_id],
+                    );
+                }
+            }
+            Ok(None) => { /* no VOD data available for this streamer — leave as-is */ }
+            Err(e) => eprintln!("backfill_last_live_at: lookup failed for user_id={user_id}: {e}"),
         }
     }
 }

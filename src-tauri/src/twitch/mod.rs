@@ -67,6 +67,7 @@ pub struct ChannelSearchResult {
 pub struct TwitchUser {
     pub user_id: i64,
     pub login: String,
+    pub profile_image_url: String,
 }
 
 pub async fn request_device_code(http: &reqwest::Client) -> anyhow::Result<DeviceCodeResponse> {
@@ -147,6 +148,7 @@ pub async fn get_self(http: &reqwest::Client, access_token: &str) -> anyhow::Res
     struct UserRow {
         id: String,
         login: String,
+        profile_image_url: String,
     }
 
     let resp: Data = helix_get(http, access_token, &format!("{HELIX_BASE}/users")).await?;
@@ -156,6 +158,7 @@ pub async fn get_self(http: &reqwest::Client, access_token: &str) -> anyhow::Res
         .next()
         .ok_or_else(|| anyhow::anyhow!("Get Users returned no data for the caller"))?;
     Ok(TwitchUser {
+        profile_image_url: row.profile_image_url,
         user_id: row.id.parse()?,
         login: row.login,
     })
@@ -244,6 +247,42 @@ pub async fn search_channels(
             })
         })
         .collect())
+}
+
+/// Best-effort "when did this channel last actually broadcast" via their most recent VOD.
+/// Not authoritative — Twitch has no dedicated "last live" field anywhere in Helix. VOD
+/// storage is off by default and, even enabled, only retained 7/14/60 days (non-affiliate/
+/// affiliate/partner), so this legitimately returns `None` for a lot of channels; callers
+/// should treat that as "no data available" (fail safe to the existing behavior), not an
+/// error. One `user_id` per call — Get Videos doesn't batch like Get Streams does.
+pub async fn get_last_broadcast_at(
+    http: &reqwest::Client,
+    access_token: &str,
+    user_id: i64,
+) -> anyhow::Result<Option<i64>> {
+    #[derive(Deserialize)]
+    struct Data {
+        data: Vec<VideoRow>,
+    }
+    #[derive(Deserialize)]
+    struct VideoRow {
+        created_at: String,
+    }
+
+    let url = format!("{HELIX_BASE}/videos");
+    let resp: Data = helix_get_with_query(
+        http,
+        access_token,
+        &url,
+        &[
+            ("user_id", user_id.to_string()),
+            ("type", "archive".to_string()),
+            ("first", "1".to_string()),
+        ],
+    )
+    .await?;
+
+    Ok(resp.data.into_iter().next().and_then(|v| chrono_parse_rfc3339(&v.created_at)))
 }
 
 async fn helix_get<T: for<'de> Deserialize<'de>>(

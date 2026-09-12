@@ -82,7 +82,11 @@
   flex-shrink: 0;
   display: flex;
   align-items: flex-end;
-  background: radial-gradient(120% 140% at 20% 0%, color-mix(in srgb, var(--accent) 35%, #2c2140), #14101c 75%);
+  background: radial-gradient(
+    120% 140% at 20% 0%,
+    color-mix(in srgb, var(--accent) 35%, var(--surface-3)),
+    var(--bg) 75%
+  );
 }
 .watchlist .thumb::after {
   content: '';

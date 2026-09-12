@@ -1,5 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
+
+/** Opens a URL in the OS default browser (e.g. Twitch's device-code activation page). */
+export function openInBrowser(url: string): Promise<void> {
+  return openUrl(url);
+}
 
 /** Mirrors src-tauri/src/auth.rs::AuthStatus (serde tag = "status"). */
 export type AuthStatus =
@@ -60,6 +66,7 @@ export interface SettingsRow {
   notify_metadata_change: boolean;
   start_on_login: boolean;
   twitch_login: string | null;
+  twitch_profile_image_url: string | null;
 }
 
 export type NotificationKind = "go_live" | "go_offline" | "metadata_change";

@@ -139,6 +139,9 @@
   background: var(--surface-3);
   color: var(--text-faint);
 }
+.settings .avatar--img {
+  object-fit: cover;
+}
 .settings .status-line {
   font-size: 0.78rem;
   font-weight: 600;
@@ -163,4 +166,15 @@
   padding: 10px 16px;
   display: inline-block;
   margin: 10px 0;
+}
+.settings .link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
 }
