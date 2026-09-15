@@ -1,7 +1,23 @@
 .poll-timer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+
+.poll-timer-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.poll-timer-ring-wrap {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,13 +33,13 @@
 .ring-track {
   fill: none;
   stroke: var(--surface-3);
-  stroke-width: 2;
+  stroke-width: 3;
 }
 
 .ring-progress {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-dashoffset: 0;
   animation-name: poll-timer-drain;
@@ -42,7 +58,7 @@
 
 .poll-timer-icon {
   position: relative;
-  color: var(--text-faint);
+  color: var(--accent);
   display: flex;
   animation: poll-timer-flip 0.6s ease-in-out;
 }

@@ -316,6 +316,119 @@ pub fn set_notification_toggle(db: State<'_, Db>, kind: String, enabled: bool) -
     settings::set_notification_toggle(&conn, parsed, enabled).map_err(|e| e.to_string())
 }
 
+/// Dev-only: writes a fake Notification (against the first real Watched Streamer, if any)
+/// and emits `notification-created` exactly as the scheduler would, so the frontend's
+/// sound/highlight/refresh reaction can be exercised without waiting for a real Twitch
+/// event. Inert in release builds — `cfg!(debug_assertions)` is `false` there, so this
+/// just returns an error instead of writing anything.
+#[tauri::command]
+pub fn simulate_notification(app: AppHandle, db: State<'_, Db>, kind: String) -> Result<(), String> {
+    if !cfg!(debug_assertions) {
+        return Err("simulate_notification is only available in dev builds".to_string());
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64;
+
+    let target = watchlist::list(&conn).ok().and_then(|rows| rows.into_iter().next());
+    let (user_id, login, display_name) = match &target {
+        Some(r) => (r.user_id, r.login.as_str(), r.display_name.as_str()),
+        None => (-1, "dev_streamer", "Dev Streamer"),
+    };
+
+    let payload = match kind.as_str() {
+        "go_live" => {
+            let category = "Just Chatting".to_string();
+            let title = "Simulated notification (dev only)".to_string();
+            let _ = notifications::insert_go_live(
+                &conn,
+                &notifications::NewGoLive {
+                    user_id,
+                    login,
+                    display_name,
+                    category: &category,
+                    title: &title,
+                },
+                now,
+            );
+            crate::scheduler::NotificationCreated {
+                user_id,
+                display_name: display_name.to_string(),
+                event_type: "go_live",
+                category: Some(category),
+                title: Some(title),
+                duration_seconds: None,
+                old_title: None,
+                new_title: None,
+                old_category: None,
+                new_category: None,
+            }
+        }
+        "go_offline" => {
+            let duration_seconds = 1830;
+            let _ = notifications::insert_go_offline(
+                &conn,
+                &notifications::NewGoOffline {
+                    user_id,
+                    login,
+                    display_name,
+                    duration_seconds,
+                },
+                now,
+            );
+            crate::scheduler::NotificationCreated {
+                user_id,
+                display_name: display_name.to_string(),
+                event_type: "go_offline",
+                category: None,
+                title: None,
+                duration_seconds: Some(duration_seconds),
+                old_title: None,
+                new_title: None,
+                old_category: None,
+                new_category: None,
+            }
+        }
+        "metadata_change" => {
+            let old_title = "Old simulated title".to_string();
+            let new_title = "New simulated title (dev only)".to_string();
+            let _ = notifications::insert_metadata_change(
+                &conn,
+                &notifications::NewMetadataChange {
+                    user_id,
+                    login,
+                    display_name,
+                    old_title: Some(&old_title),
+                    new_title: Some(&new_title),
+                    old_category: None,
+                    new_category: None,
+                },
+                now,
+            );
+            crate::scheduler::NotificationCreated {
+                user_id,
+                display_name: display_name.to_string(),
+                event_type: "metadata_change",
+                category: None,
+                title: None,
+                duration_seconds: None,
+                old_title: Some(old_title),
+                new_title: Some(new_title),
+                old_category: None,
+                new_category: None,
+            }
+        }
+        other => return Err(format!("unknown notification kind: {other}")),
+    };
+    drop(conn);
+
+    let _ = app.emit("notification-created", payload);
+    Ok(())
+}
+
 #[tauri::command]
 pub fn set_start_on_login(app: AppHandle, db: State<'_, Db>, enabled: bool) -> Result<(), String> {
     use tauri_plugin_autostart::ManagerExt;

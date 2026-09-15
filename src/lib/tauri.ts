@@ -57,6 +57,7 @@ export interface NotificationRow {
   new_title: string | null;
   old_category: string | null;
   new_category: string | null;
+  streamer_profile_image_url: string | null;
 }
 
 /** Mirrors src-tauri/src/db/settings.rs::SettingsRow. */
@@ -100,6 +101,9 @@ export const commands = {
   setNotificationToggle: (kind: NotificationKind, enabled: boolean) =>
     invoke<void>("set_notification_toggle", { kind, enabled }),
   setStartOnLogin: (enabled: boolean) => invoke<void>("set_start_on_login", { enabled }),
+  /** Dev-only — errors out in a release build. See commands::simulate_notification. */
+  simulateNotification: (kind: NotificationKind) =>
+    invoke<void>("simulate_notification", { kind }),
 };
 
 export function onAuthStatusChanged(
@@ -108,11 +112,26 @@ export function onAuthStatusChanged(
   return listen<AuthStatus>("auth-status-changed", (event) => handler(event.payload));
 }
 
-/** Fires whenever the scheduler writes a Notification; payload is the streamer's user_id. */
+/** Mirrors scheduler.rs::NotificationCreated. One event is emitted per Notification row
+ *  written — a tick that logs a title AND a category change emits two, one for each. */
+export interface NotificationCreatedEvent {
+  user_id: number;
+  display_name: string;
+  event_type: NotificationKind;
+  category: string | null;
+  title: string | null;
+  duration_seconds: number | null;
+  old_title: string | null;
+  new_title: string | null;
+  old_category: string | null;
+  new_category: string | null;
+}
+
+/** Fires whenever the scheduler writes a Notification. */
 export function onNotificationCreated(
-  handler: (userId: number) => void,
+  handler: (event: NotificationCreatedEvent) => void,
 ): Promise<UnlistenFn> {
-  return listen<number>("notification-created", (event) => handler(event.payload));
+  return listen<NotificationCreatedEvent>("notification-created", (event) => handler(event.payload));
 }
 
 /** Fires every scheduler tick (~20s) — view counts etc. change even with no Notification. */

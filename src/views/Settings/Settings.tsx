@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { commands, openInBrowser, type AuthStatus, type NotificationKind, type SettingsRow } from "../../lib/tauri";
+import { PanelBottomIcon, PlugIcon, UnplugIcon, UserRoundIcon } from "../../components/icons";
+import { DEV_KEYBINDS } from "../../lib/devKeybinds";
 import "./Settings.css";
 
 interface SettingsProps {
@@ -42,7 +44,10 @@ export function Settings({ authStatus }: SettingsProps) {
     <div className="settings">
       <div className="dash-grid">
         <div className="dash-card span-2">
-          <h2 className="section-heading">Account</h2>
+          <div className="card-title-row">
+            <h2 className="card-title">Account</h2>
+            <span className="rule" />
+          </div>
           {authStatus.status === "connected" && (
             <div className="account-row">
               {settings?.twitch_profile_image_url ? (
@@ -50,14 +55,18 @@ export function Settings({ authStatus }: SettingsProps) {
               ) : (
                 <div className="avatar">{authStatus.login.slice(0, 2).toUpperCase()}</div>
               )}
-              <div style={{ flex: 1 }}>
-                <div className="field-label">Connected as {authStatus.login}</div>
-                <div className="status-line">
-                  <span className="status-dot" />
-                  Active
+              <div className="account-info">
+                <div className="name-row">
+                  <div className="field-label">{authStatus.login}</div>
+                  <div className="status-tag">
+                    <span className="status-dot" />
+                    ACTIVE
+                  </div>
                 </div>
+                <div className="field-desc">connected via Twitch device authorization</div>
               </div>
               <button className="btn btn-ghost btn-sm" onClick={() => commands.disconnect()}>
+                <UnplugIcon size={14} />
                 Disconnect
               </button>
             </div>
@@ -79,24 +88,30 @@ export function Settings({ authStatus }: SettingsProps) {
           {authStatus.status === "disconnected" && (
             <>
               <div className="account-row">
-                <div className="avatar avatar--empty">?</div>
-                <div style={{ flex: 1 }}>
-                  <div className="field-label">Not connected</div>
-                  <div className="field-desc">Connect your Twitch account so TwitchTrack can check your Watchlist.</div>
+                <div className="avatar avatar--empty">
+                  <UserRoundIcon size={22} />
                 </div>
-              </div>
-              <div style={{ marginTop: 14 }}>
+                <div className="account-info">
+                  <div className="field-label">Not connected</div>
+                  <div className="field-desc">
+                    TwitchTrack needs a Twitch account to look up streamers and check who is live.
+                  </div>
+                </div>
                 <button className="btn btn-primary" onClick={connect} disabled={connectBusy}>
+                  <PlugIcon size={15} />
                   Connect your Twitch account
                 </button>
-                {connectError && <div className="field-desc" style={{ color: "var(--warn)" }}>{connectError}</div>}
               </div>
+              {connectError && <div className="field-desc" style={{ color: "var(--warn)" }}>{connectError}</div>}
             </>
           )}
         </div>
 
         <div className="dash-card">
-          <h2 className="section-heading">Notifications</h2>
+          <div className="card-title-row">
+            <h2 className="card-title">Notifications</h2>
+            <span className="rule" />
+          </div>
           {settings && (
             <>
               <ToggleRow
@@ -122,7 +137,10 @@ export function Settings({ authStatus }: SettingsProps) {
         </div>
 
         <div className="dash-card">
-          <h2 className="section-heading">Startup</h2>
+          <div className="card-title-row">
+            <h2 className="card-title">Startup</h2>
+            <span className="rule" />
+          </div>
           {settings && (
             <ToggleRow
               label="Start on login"
@@ -131,11 +149,30 @@ export function Settings({ authStatus }: SettingsProps) {
               onChange={toggleStartOnLogin}
             />
           )}
-          <div className="field-desc" style={{ marginTop: 12 }}>
-            Closing the window keeps TwitchTrack running in your system tray — use the tray icon's
-            menu to quit for real.
+          <div className="tray-note">
+            <PanelBottomIcon size={14} />
+            <span>
+              Closing the window keeps TwitchTrack running in the system tray — use the tray menu to quit
+              it for good.
+            </span>
           </div>
         </div>
+
+        {import.meta.env.DEV && (
+          <div className="dash-card span-2">
+            <div className="card-title-row">
+              <h2 className="card-title">Developer</h2>
+              <span className="rule" />
+            </div>
+            <div className="field-desc">Only present in dev builds — these don't exist in a packaged release.</div>
+            {DEV_KEYBINDS.map((kb) => (
+              <div className="keybind-row" key={kb.keys}>
+                <kbd className="keybind-key">{kb.keys}</kbd>
+                <div className="field-desc">{kb.description}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

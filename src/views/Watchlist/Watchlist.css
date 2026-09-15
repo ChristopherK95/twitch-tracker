@@ -4,24 +4,47 @@
 
 .watchlist .search-row {
   position: relative;
-  margin: 14px 0 20px;
+  margin: 14px 0 24px;
 }
-.watchlist .search-row input {
+.watchlist .search-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--surface);
+  color: var(--text-faint);
+  cursor: text;
+}
+.watchlist .search-input:focus-within {
+  border-color: var(--accent);
+}
+.watchlist .search-input input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
   color: var(--text-high);
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
-.watchlist .search-row input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.watchlist .search-input input:focus {
+  outline: none;
 }
-.watchlist .search-row input:disabled {
+.watchlist .search-input input:disabled {
   opacity: 0.6;
+}
+.watchlist .search-shortcut {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-faint);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 6px;
+  flex-shrink: 0;
 }
 .watchlist .search-results {
   position: absolute;
@@ -43,7 +66,8 @@
   border-radius: 7px;
   cursor: pointer;
 }
-.watchlist .search-hit:hover {
+.watchlist .search-hit:hover,
+.watchlist .search-hit--active {
   background: var(--surface-2);
 }
 .watchlist .search-hit .avatar {
@@ -51,37 +75,94 @@
   height: 26px;
   font-size: 0.65rem;
 }
-
-.watchlist h2.section-heading {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin: 22px 0 10px;
+.watchlist .search-hit .track-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 4px 9px;
+  border-radius: 5px;
+  flex-shrink: 0;
 }
 
-.watchlist .row {
+.watchlist .section + .section {
+  margin-top: 28px;
+}
+
+.watchlist .section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  margin-bottom: 14px;
+}
+.watchlist .section-heading--live {
+  color: var(--accent);
+}
+.watchlist .section-heading .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.watchlist .section-heading .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.watchlist .count-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+.watchlist .count-badge--live {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.watchlist .live-list,
+.watchlist .offline-list {
+  display: flex;
+  flex-direction: column;
+}
+.watchlist .live-list {
+  gap: 10px;
+}
+
+.watchlist .row--live {
   display: flex;
   gap: 14px;
-  align-items: center;
-  padding: 10px 12px;
+  padding: 12px 13px;
   border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
-.watchlist .row:hover {
-  background: var(--surface-2);
+.watchlist .row--live.row--fresh {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
 }
 
 .watchlist .thumb {
-  width: 128px;
-  height: 72px;
-  border-radius: 8px;
+  width: 168px;
+  height: 94px;
+  border-radius: 6px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  display: flex;
-  align-items: flex-end;
   background: radial-gradient(
     120% 140% at 20% 0%,
     color-mix(in srgb, var(--accent) 35%, var(--surface-3)),
@@ -92,7 +173,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 60%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 55%);
 }
 .watchlist .thumb-img {
   position: absolute;
@@ -101,24 +182,44 @@
   height: 100%;
   object-fit: cover;
 }
-.watchlist .thumb .viewers-chip {
-  position: relative;
+.watchlist .thumb .live-tag {
+  position: absolute;
   z-index: 1;
-  margin: 6px;
+  top: 7px;
+  left: 7px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.watchlist .thumb .pulse-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-ink);
+}
+.watchlist .thumb .viewers-chip {
+  position: absolute;
+  z-index: 1;
+  bottom: 7px;
+  left: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.85);
+  color: var(--accent);
+  padding: 3px 7px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   gap: 4px;
-}
-.watchlist .thumb .viewers-chip::before {
-  content: '●';
-  color: var(--live);
-  font-size: 0.55rem;
 }
 
 .watchlist .avatar {
@@ -138,19 +239,29 @@
   background: var(--surface-3);
 }
 .watchlist .avatar--small {
-  width: 22px;
-  height: 22px;
-  font-size: 0.6rem;
+  width: 24px;
+  height: 24px;
+  font-size: 0.62rem;
+}
+.watchlist .avatar--dim {
+  width: 32px;
+  height: 32px;
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 .watchlist .row-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
 }
 .watchlist .row-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex-wrap: wrap;
 }
 .watchlist .name-btn {
@@ -158,30 +269,66 @@
   border: none;
   padding: 0;
   margin: 0;
-  font-family: inherit;
+  font-family: var(--font-display);
   font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
   color: var(--text-high);
   cursor: pointer;
   text-align: left;
-  font-size: 1rem;
 }
 .watchlist .name-btn:hover {
   color: var(--accent);
-  text-decoration: underline;
+}
+.watchlist .name-btn--muted {
+  font-size: 0.94rem;
+  color: var(--text-muted);
+}
+.watchlist .open-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.watchlist .open-btn--faint {
+  color: var(--text-faint);
 }
 .watchlist .category-pill {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   color: var(--text-muted);
-  letter-spacing: 0.02em;
+}
+.watchlist .spacer {
+  flex: 1;
+}
+.watchlist .fresh-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 4px 8px 2px;
+  border-radius: 5px;
 }
 .watchlist .row-title {
   font-size: 0.86rem;
   color: var(--text-muted);
-  margin-top: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -189,13 +336,24 @@
 .watchlist .row-stats {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.78rem;
-  margin-top: 4px;
+  font-size: 0.76rem;
   display: flex;
   gap: 10px;
-  color: var(--text-muted);
+  color: var(--text-faint);
+}
+
+.watchlist .row--offline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.watchlist .row--offline:last-child {
+  border-bottom: none;
 }
 .watchlist .row-faint {
+  font-family: var(--font-mono);
   font-size: 0.76rem;
   color: var(--text-faint);
 }

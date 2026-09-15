@@ -3,39 +3,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
+  background: var(--bg);
 }
 
 .onboarding-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 32px 28px;
+  border-radius: 14px;
+  box-shadow: 0 0 70px color-mix(in srgb, var(--accent) 12%, transparent), 0 16px 40px rgba(0, 0, 0, 0.4);
+  padding: 34px 32px 28px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.onboarding-mascot {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
 }
 
 .onboarding-card h1 {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
   margin: 0 0 8px;
 }
 
 .onboarding-card .subtitle {
   font-size: 0.88rem;
   color: var(--text-muted);
-  margin: 0 0 24px;
-  line-height: 1.5;
+  margin: 0 0 22px;
+  line-height: 1.6;
+}
+.onboarding-card .subtitle--inline {
+  margin-bottom: 14px;
 }
 
 .onboarding-card .btn-primary {
-  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.88rem;
-  border-radius: 10px;
-  padding: 11px 22px;
+  border-radius: 9px;
+  padding: 12px 22px;
   cursor: pointer;
   border: none;
   background: var(--accent);
@@ -52,13 +71,37 @@
 
 .onboarding-card .code-box {
   font-family: var(--font-mono);
-  font-size: 1.4rem;
-  letter-spacing: 0.14em;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--accent);
   background: var(--surface-2);
-  border: 1px dashed var(--border);
+  border: 1px solid var(--accent);
   border-radius: 10px;
-  padding: 12px 18px;
-  margin: 6px 0 14px;
+  padding: 14px 20px;
+  margin: 4px 0 16px;
+}
+
+.onboarding-card .waiting-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.onboarding-card .waiting-note .spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--text-faint);
+  animation: onboarding-spin 0.8s linear infinite;
+}
+@keyframes onboarding-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .onboarding-card .field-desc {
@@ -75,51 +118,86 @@
 
 .onboarding-card .search-row {
   position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: left;
   margin-bottom: 4px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--surface-2);
+  cursor: text;
+}
+.onboarding-card .search-row-icon {
+  color: var(--accent);
+  flex-shrink: 0;
 }
 .onboarding-card .search-row input {
-  width: 100%;
-  padding: 11px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
   color: var(--text-high);
   font-family: var(--font-body);
   font-size: 0.9rem;
 }
 .onboarding-card .search-row input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
 }
 .onboarding-card .search-results {
-  margin-top: 8px;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
+  padding: 5px;
+  z-index: 2;
 }
 .onboarding-card .search-hit {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 9px;
+  border-radius: 6px;
   cursor: pointer;
   text-align: left;
 }
 .onboarding-card .search-hit:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 .onboarding-card .search-hit .avatar {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
   font-weight: 700;
+  font-size: 0.62rem;
   color: #fff;
   flex-shrink: 0;
+}
+.onboarding-card .search-hit span:not(.spacer):not(.track-chip) {
+  font-size: 0.86rem;
+}
+.onboarding-card .search-hit .spacer {
+  flex: 1;
+}
+.onboarding-card .track-chip {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 4px 9px;
+  border-radius: 5px;
 }
 
 .onboarding-card .link-btn {
@@ -136,11 +214,13 @@
 
 .onboarding-card .skip-link {
   display: inline-block;
-  margin-top: 18px;
+  margin-top: 16px;
   background: none;
   border: none;
   color: var(--text-faint);
   font-size: 0.82rem;
   cursor: pointer;
-  text-decoration: underline;
+}
+.onboarding-card .skip-link:hover {
+  color: var(--text-muted);
 }

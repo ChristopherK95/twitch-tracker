@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { commands, openInBrowser, type AuthStatus, type ChannelSearchResult } from "../../lib/tauri";
+import mascotMark from "../../assets/mascot.png";
+import { PlugIcon, SearchIcon } from "../../components/icons";
 import "./Onboarding.css";
 
 function initials(name: string): string {
@@ -33,26 +35,31 @@ export function ConnectStep({ authStatus }: { authStatus: AuthStatus }) {
   return (
     <div className="onboarding">
       <div className="onboarding-card">
+        <img src={mascotMark} alt="" className="onboarding-mascot" />
         <h1>Welcome to TwitchTrack</h1>
-        <p className="subtitle">
-          Connect your Twitch account so TwitchTrack can check on the streamers you want to
-          keep an eye on.
-        </p>
         {authStatus.status === "connecting" ? (
           <>
-            <div className="field-desc" style={{ marginBottom: 6 }}>
+            <p className="subtitle subtitle--inline">
               Go to{" "}
               <button className="link-btn" onClick={() => openInBrowser(authStatus.verification_uri)}>
                 {authStatus.verification_uri}
               </button>{" "}
               and confirm this code:
-            </div>
+            </p>
             <div className="code-box">{authStatus.user_code}</div>
-            <div className="field-desc">Waiting for approval…</div>
+            <div className="waiting-note">
+              <span className="spinner" />
+              Waiting for approval…
+            </div>
           </>
         ) : (
           <>
+            <p className="subtitle">
+              Connect your Twitch account so TwitchTrack can check on the streamers you want to
+              keep an eye on.
+            </p>
             <button className="btn-primary" onClick={connect} disabled={busy}>
+              <PlugIcon size={16} />
               Connect your Twitch account
             </button>
             {error && <div className="error">{error}</div>}
@@ -73,6 +80,7 @@ export function AddFirstStreamerStep({ onDone }: { onDone: () => void }) {
   const [results, setResults] = useState<ChannelSearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -106,8 +114,10 @@ export function AddFirstStreamerStep({ onDone }: { onDone: () => void }) {
       <div className="onboarding-card">
         <h1>Track your first streamer</h1>
         <p className="subtitle">Search for a Twitch channel to start watching for when they go live.</p>
-        <div className="search-row">
+        <div className="search-row" onClick={() => searchInputRef.current?.focus()}>
+          <SearchIcon size={16} className="search-row-icon" />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search for a streamer…"
             value={query}
@@ -122,6 +132,8 @@ export function AddFirstStreamerStep({ onDone }: { onDone: () => void }) {
                     {initials(r.display_name)}
                   </div>
                   <span>{r.display_name}</span>
+                  <span className="spacer" />
+                  <span className="track-chip">TRACK</span>
                 </div>
               ))}
             </div>

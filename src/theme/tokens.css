@@ -1,48 +1,49 @@
 /*
- * TwitchTrack visual identity — "Stream Violet".
- * Source of record: .scratch/twitchtrack-v1-spec/issues/09-visual-identity-prototype.md
+ * TwitchTrack visual identity — "Pitch Magenta".
+ * Designed in pen.dev (see twitch_tracker_pencil_design.pen at the repo root) and ported
+ * here token-for-token. Supersedes the original "Stream Violet" identity.
  * Dark-first; light palette derived from the same tokens (not yet used anywhere but Settings
  * doesn't expose a theme toggle in v1 — the app follows the OS scheme).
  */
 
 :root {
-  --bg: #faf9fc;
+  --bg: #f8f5f6;
   --surface: #ffffff;
-  --surface-2: #f1eef7;
-  --surface-3: #e7e2f3;
-  --text-high: #1d1a29;
-  --text-muted: #6f6790;
-  --text-faint: #9b92b8;
-  --accent: #6a4fe0;
+  --surface-2: #f5eaef;
+  --surface-3: #ead9e1;
+  --text-high: #150e11;
+  --text-muted: #645a5f;
+  --text-faint: #948a8f;
+  --accent: #c2005c;
   --accent-ink: #ffffff;
-  --live: #1e9e5a;
+  --live: #c2005c;
   --live-ink: #ffffff;
-  --warn: #b5620a;
-  --warn-bg: #fcebd8;
-  --border: #e3dfee;
+  --warn: #8a5a00;
+  --warn-bg: #fbeecd;
+  --border: #ebe0e5;
   --shadow: 0 1px 2px rgba(29, 26, 41, 0.06), 0 8px 24px rgba(29, 26, 41, 0.08);
 
-  --font-display: 'Sora', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #14121b;
-    --surface: #1d1a29;
-    --surface-2: #262238;
-    --surface-3: #322c47;
-    --text-high: #f1eefa;
-    --text-muted: #9b92b8;
-    --text-faint: #6f6790;
-    --accent: #8b7cff;
-    --accent-ink: #14121b;
-    --live: #33d17a;
-    --live-ink: #0b2015;
-    --warn: #f0a94e;
-    --warn-bg: #3a2a12;
-    --border: #322c47;
+    --bg: #000000;
+    --surface: #0f0c0e;
+    --surface-2: #1a1418;
+    --surface-3: #261d22;
+    --text-high: #f7edf1;
+    --text-muted: #a89aa0;
+    --text-faint: #6e626a;
+    --accent: #ff3d8b;
+    --accent-ink: #12030a;
+    --live: #ff3d8b;
+    --live-ink: #12030a;
+    --warn: #ffb020;
+    --warn-bg: #2b1c08;
+    --border: #241a1f;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
   }
 }

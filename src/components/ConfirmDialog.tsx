@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { TrashIcon } from "./icons";
 import "./ConfirmDialog.css";
 
 interface ConfirmDialogProps {
@@ -45,8 +46,15 @@ export function ConfirmDialog({
         aria-labelledby="confirm-dialog-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div id="confirm-dialog-title" className="confirm-dialog-title">
-          {title}
+        <div className="confirm-dialog-head">
+          {destructive && (
+            <div className="confirm-dialog-icon">
+              <TrashIcon size={16} />
+            </div>
+          )}
+          <div id="confirm-dialog-title" className="confirm-dialog-title">
+            {title}
+          </div>
         </div>
         <div className="confirm-dialog-message">{message}</div>
         <div className="confirm-dialog-actions">
@@ -57,6 +65,7 @@ export function ConfirmDialog({
             className={`confirm-btn ${destructive ? "confirm-btn--destructive" : "confirm-btn--primary"}`}
             onClick={onConfirm}
           >
+            {destructive && <TrashIcon size={13} />}
             {confirmLabel}
           </button>
         </div>

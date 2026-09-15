@@ -16,6 +16,7 @@ pub struct NotificationRow {
     pub new_title: Option<String>,
     pub old_category: Option<String>,
     pub new_category: Option<String>,
+    pub streamer_profile_image_url: Option<String>,
 }
 
 pub struct NewGoLive<'a> {
@@ -80,11 +81,15 @@ pub fn insert_metadata_change(conn: &Connection, n: &NewMetadataChange, now: i64
 }
 
 pub fn list(conn: &Connection) -> rusqlite::Result<Vec<NotificationRow>> {
+    // LEFT JOIN so a notification still lists (with no picture) if its streamer was since
+    // removed from the Watchlist.
     let mut stmt = conn.prepare(
-        "SELECT id, event_type, streamer_user_id, streamer_login, streamer_display_name, created_at,
-                category, title, duration_seconds, old_title, new_title, old_category, new_category
-         FROM notifications
-         ORDER BY created_at DESC",
+        "SELECT n.id, n.event_type, n.streamer_user_id, n.streamer_login, n.streamer_display_name, n.created_at,
+                n.category, n.title, n.duration_seconds, n.old_title, n.new_title, n.old_category, n.new_category,
+                w.profile_image_url
+         FROM notifications n
+         LEFT JOIN watched_streamers w ON w.user_id = n.streamer_user_id
+         ORDER BY n.created_at DESC",
     )?;
     let rows = stmt.query_map([], |row| {
         Ok(NotificationRow {
@@ -101,6 +106,7 @@ pub fn list(conn: &Connection) -> rusqlite::Result<Vec<NotificationRow>> {
             new_title: row.get(10)?,
             old_category: row.get(11)?,
             new_category: row.get(12)?,
+            streamer_profile_image_url: row.get(13)?,
         })
     })?;
     rows.collect()

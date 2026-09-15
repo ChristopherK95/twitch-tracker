@@ -147,6 +147,26 @@ enum TickError {
     Request(anyhow::Error),
 }
 
+/// Emitted as the `notification-created` event's payload — mirrors the relevant subset of
+/// `NotificationRow` (event_type plus its per-type detail fields) so the frontend can
+/// render a toast/sound/highlight reaction without a round-trip back to `get_notifications`.
+/// One of these is emitted per Notification row written — a tick that logs two rows (e.g.
+/// title AND category changed at once, logged separately — see below) emits two.
+/// `pub(crate)` so `commands::simulate_notification` (dev-only) can emit the same shape.
+#[derive(Clone, serde::Serialize)]
+pub(crate) struct NotificationCreated {
+    pub user_id: i64,
+    pub display_name: String,
+    pub event_type: &'static str,
+    pub category: Option<String>,        // go_live
+    pub title: Option<String>,           // go_live
+    pub duration_seconds: Option<i64>,   // go_offline
+    pub old_title: Option<String>,       // metadata_change
+    pub new_title: Option<String>,       // metadata_change
+    pub old_category: Option<String>,    // metadata_change
+    pub new_category: Option<String>,    // metadata_change
+}
+
 async fn tick_once(
     app: &AppHandle,
     tracks: &mut HashMap<i64, StreamerTrack>,
@@ -189,7 +209,6 @@ async fn tick_once(
 
     let now = now_unix();
     let mut cache_out: HashMap<i64, LiveEntry> = HashMap::new();
-    let mut notified_user_id: Option<i64> = None;
 
     for row in &rows {
         let track = tracks.entry(row.user_id).or_default();
@@ -220,7 +239,21 @@ async fn tick_once(
                         &format!("{} is live", row.display_name),
                         &format!("{} — {}", s.category, s.title),
                     );
-                    notified_user_id = Some(row.user_id);
+                    let _ = app.emit(
+                        "notification-created",
+                        NotificationCreated {
+                            user_id: row.user_id,
+                            display_name: row.display_name.clone(),
+                            event_type: "go_live",
+                            category: Some(s.category.clone()),
+                            title: Some(s.title.clone()),
+                            duration_seconds: None,
+                            old_title: None,
+                            new_title: None,
+                            old_category: None,
+                            new_category: None,
+                        },
+                    );
                 }
                 track.is_live = true;
                 track.started_at = s.started_at;
@@ -249,7 +282,21 @@ async fn tick_once(
                         &format!("{} went offline", row.display_name),
                         &format!("after {}", format_duration(duration_seconds)),
                     );
-                    notified_user_id = Some(row.user_id);
+                    let _ = app.emit(
+                        "notification-created",
+                        NotificationCreated {
+                            user_id: row.user_id,
+                            display_name: row.display_name.clone(),
+                            event_type: "go_offline",
+                            category: None,
+                            title: None,
+                            duration_seconds: Some(duration_seconds),
+                            old_title: None,
+                            new_title: None,
+                            old_category: None,
+                            new_category: None,
+                        },
+                    );
                 }
                 {
                     let conn = db.0.lock().unwrap();
@@ -280,22 +327,71 @@ async fn tick_once(
                             let category_changed = s.category != track.confirmed_category;
                             if toggles.metadata_change && !suppress_notifications {
                                 let conn = db.0.lock().unwrap();
-                                let _ = notifications::insert_metadata_change(
-                                    &conn,
-                                    &notifications::NewMetadataChange {
-                                        user_id: row.user_id,
-                                        login: &row.login,
-                                        display_name: &row.display_name,
-                                        old_title: title_changed
-                                            .then_some(track.confirmed_title.as_str()),
-                                        new_title: title_changed.then_some(s.title.as_str()),
-                                        old_category: category_changed
-                                            .then_some(track.confirmed_category.as_str()),
-                                        new_category: category_changed
-                                            .then_some(s.category.as_str()),
-                                    },
-                                    changed_at,
-                                );
+                                // Desktop notifications combine both changes into one toast
+                                // (see below), but the in-app Notification Log reads better
+                                // as two separate entries — so log title and category
+                                // changes as their own rows even when they land in the same
+                                // debounce window.
+                                if title_changed {
+                                    let _ = notifications::insert_metadata_change(
+                                        &conn,
+                                        &notifications::NewMetadataChange {
+                                            user_id: row.user_id,
+                                            login: &row.login,
+                                            display_name: &row.display_name,
+                                            old_title: Some(track.confirmed_title.as_str()),
+                                            new_title: Some(s.title.as_str()),
+                                            old_category: None,
+                                            new_category: None,
+                                        },
+                                        changed_at,
+                                    );
+                                    let _ = app.emit(
+                                        "notification-created",
+                                        NotificationCreated {
+                                            user_id: row.user_id,
+                                            display_name: row.display_name.clone(),
+                                            event_type: "metadata_change",
+                                            category: None,
+                                            title: None,
+                                            duration_seconds: None,
+                                            old_title: Some(track.confirmed_title.clone()),
+                                            new_title: Some(s.title.clone()),
+                                            old_category: None,
+                                            new_category: None,
+                                        },
+                                    );
+                                }
+                                if category_changed {
+                                    let _ = notifications::insert_metadata_change(
+                                        &conn,
+                                        &notifications::NewMetadataChange {
+                                            user_id: row.user_id,
+                                            login: &row.login,
+                                            display_name: &row.display_name,
+                                            old_title: None,
+                                            new_title: None,
+                                            old_category: Some(track.confirmed_category.as_str()),
+                                            new_category: Some(s.category.as_str()),
+                                        },
+                                        changed_at,
+                                    );
+                                    let _ = app.emit(
+                                        "notification-created",
+                                        NotificationCreated {
+                                            user_id: row.user_id,
+                                            display_name: row.display_name.clone(),
+                                            event_type: "metadata_change",
+                                            category: None,
+                                            title: None,
+                                            duration_seconds: None,
+                                            old_title: None,
+                                            new_title: None,
+                                            old_category: Some(track.confirmed_category.clone()),
+                                            new_category: Some(s.category.clone()),
+                                        },
+                                    );
+                                }
                                 drop(conn);
                                 send_desktop_notification(
                                     app,
@@ -309,7 +405,6 @@ async fn tick_once(
                                         &s.category,
                                     ),
                                 );
-                                notified_user_id = Some(row.user_id);
                             }
                             track.confirmed_title = s.title.clone();
                             track.confirmed_category = s.category.clone();
@@ -352,10 +447,6 @@ async fn tick_once(
     // Every tick, regardless of any Notification — view counts etc. change even
     // without a Status/Metadata Change, and the Watchlist should reflect that live.
     let _ = app.emit("live-state-updated", ());
-
-    if let Some(user_id) = notified_user_id {
-        let _ = app.emit("notification-created", user_id);
-    }
 
     if tick % PRUNE_EVERY_N_TICKS == 0 {
         let conn = db.0.lock().unwrap();

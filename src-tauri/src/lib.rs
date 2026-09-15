@@ -81,6 +81,7 @@ pub fn run() {
             commands::get_settings,
             commands::set_notification_toggle,
             commands::set_start_on_login,
+            commands::simulate_notification,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { commands, type NotificationRow } from "../../lib/tauri";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { ArrowRightIcon, ChevronDownIcon, QuoteIcon, TagIcon, TrashIcon } from "../../components/icons";
 import "./NotificationLog.css";
 
 function initials(name: string): string {
@@ -15,28 +16,66 @@ function formatDuration(seconds: number): string {
   return h > 0 ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
 }
 function formatTime(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return new Date(unixSeconds * 1000).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 function formatFullDate(unixSeconds: number): string {
   return new Date(unixSeconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function entryText(n: NotificationRow): string {
+function EntryText({ n }: { n: NotificationRow }) {
   if (n.event_type === "go_live") {
-    return `is live — ${n.category}: ${n.title}`;
+    return (
+      <>
+        is live — {n.category}: {n.title}
+      </>
+    );
   }
   if (n.event_type === "go_offline") {
-    return `went offline after ${formatDuration(n.duration_seconds ?? 0)}`;
+    return <>went offline after {formatDuration(n.duration_seconds ?? 0)}</>;
   }
-  const parts: string[] = [];
-  if (n.old_title) parts.push(`changed their title — "${n.old_title}" → "${n.new_title}"`);
-  if (n.old_category) parts.push(`changed category — ${n.old_category} → ${n.new_category}`);
-  return parts.join(" and ");
+
+  const titleChanged = n.old_title !== null;
+  const categoryChanged = n.old_category !== null;
+  return (
+    <>
+      {titleChanged && <>changed their title — {n.new_title}</>}
+      {titleChanged && categoryChanged && " and "}
+      {categoryChanged && (
+        <span className="category-change">
+          {titleChanged ? "category" : "changed category"}
+          <span className="category-pill category-pill--old">{n.old_category}</span>
+          <ArrowRightIcon size={11} />
+          <span className="category-pill category-pill--new">{n.new_category}</span>
+        </span>
+      )}
+    </>
+  );
 }
 
-function EvtIcon({ type }: { type: NotificationRow["event_type"] }) {
-  const glyph = type === "go_live" ? "●" : type === "go_offline" ? "○" : "✎";
-  return <div className={`evt-icon ${type}`}>{glyph}</div>;
+function EvtIcon({ n }: { n: NotificationRow }) {
+  if (n.event_type === "go_live") return <span className="evt-mark evt-mark--live" />;
+  if (n.event_type === "go_offline") return <span className="evt-mark evt-mark--offline" />;
+  return (
+    <span className="evt-mark evt-mark--change">
+      {n.old_title !== null ? <QuoteIcon size={12} /> : <TagIcon size={12} />}
+    </span>
+  );
+}
+
+function Avatar({ userId, displayName, imageUrl }: { userId: number; displayName: string; imageUrl: string | null }) {
+  const [failed, setFailed] = useState(false);
+  if (imageUrl && !failed) {
+    return <img src={imageUrl} alt="" className="avatar avatar-img" onError={() => setFailed(true)} />;
+  }
+  return (
+    <div className="avatar" style={{ background: `hsl(${hueFor(userId)} 60% 45%)` }}>
+      {initials(displayName)}
+    </div>
+  );
 }
 
 const FILTERS: { key: "all" | NotificationRow["event_type"]; label: string }[] = [
@@ -107,8 +146,10 @@ export function NotificationLog({ highlightUserId, refreshSignal }: Notification
             {f.label}
           </button>
         ))}
+        <span className="toolbar-spacer" />
         {rows.length > 0 && (
           <button className="chip clear-log-btn" onClick={() => setConfirmingClear(true)}>
+            <TrashIcon size={12} />
             Clear log
           </button>
         )}
@@ -134,21 +175,24 @@ export function NotificationLog({ highlightUserId, refreshSignal }: Notification
         return (
           <div className={`group ${isCollapsed ? "collapsed" : ""}`} key={userId}>
             <div className="group-head" onClick={() => toggleGroup(userId)}>
-              <div className="avatar" style={{ background: `hsl(${hueFor(userId)} 60% 45%)` }}>
-                {initials(displayName)}
-              </div>
+              <Avatar userId={userId} displayName={displayName} imageUrl={entries[0].streamer_profile_image_url} />
               <div className="group-title">{displayName}</div>
               <div className="group-count">
-                {entries.length} notification{entries.length > 1 ? "s" : ""}
+                {entries.length} EVENT{entries.length > 1 ? "S" : ""}
               </div>
-              <div className="chevron">▾</div>
+              <div className="spacer" />
+              <div className="chevron">
+                <ChevronDownIcon size={16} />
+              </div>
             </div>
             <div className="group-body">
               {entries.map((n) => (
                 <div className="entry" key={n.id}>
-                  <EvtIcon type={n.event_type} />
+                  <EvtIcon n={n} />
                   <div className="entry-body">
-                    <div className="entry-text">{entryText(n)}</div>
+                    <div className="entry-text">
+                      <EntryText n={n} />
+                    </div>
                     <div className="entry-time">
                       {formatFullDate(n.created_at)}, {formatTime(n.created_at)}
                     </div>
