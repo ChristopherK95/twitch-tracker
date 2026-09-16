@@ -997,11 +997,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "r7pH2t",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "qjlnw",
@@ -1059,17 +1071,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "OPLUk",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "H246X",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "late night patch notes & chill",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "vBW6u",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "OPLUk",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "late night patch notes & chill",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -1260,11 +1292,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "zJfkc",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "UyC3e",
@@ -1281,17 +1325,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "BemAy",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "mmvwZ",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "First playthrough — no spoilers please",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "tT6Z8",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "BemAy",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "First playthrough — no spoilers please",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -1482,11 +1546,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "DvzDO",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "R0i7a5",
@@ -1503,17 +1579,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "jcAGj",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "vp6Oj",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "building a Rust CLI from scratch",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Y8mjPc",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "jcAGj",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "building a Rust CLI from scratch",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -2278,10 +2374,10 @@
                                 {
                                   "type": "icon",
                                   "id": "DAvX8",
-                                  "name": "Pencil",
+                                  "name": "Title Change Icon",
                                   "width": 12,
                                   "height": 12,
-                                  "icon": "pencil",
+                                  "icon": "quote",
                                   "library": "lucide",
                                   "fill": "$np-accent"
                                 }
@@ -2633,10 +2729,10 @@
                                 {
                                   "type": "icon",
                                   "id": "rnw8V",
-                                  "name": "Pencil",
+                                  "name": "Category Change Icon",
                                   "width": 12,
                                   "height": 12,
-                                  "icon": "pencil",
+                                  "icon": "tag",
                                   "library": "lucide",
                                   "fill": "$np-accent"
                                 }
@@ -4977,10 +5073,10 @@
                                 {
                                   "type": "icon",
                                   "id": "L9WlWU",
-                                  "name": "Pencil",
+                                  "name": "Title Change Icon",
                                   "width": 12,
                                   "height": 12,
-                                  "icon": "pencil",
+                                  "icon": "quote",
                                   "library": "lucide",
                                   "fill": "$np-accent"
                                 }
@@ -5332,10 +5428,10 @@
                                 {
                                   "type": "icon",
                                   "id": "TrcPL",
-                                  "name": "Pencil",
+                                  "name": "Category Change Icon",
                                   "width": 12,
                                   "height": 12,
-                                  "icon": "pencil",
+                                  "icon": "tag",
                                   "library": "lucide",
                                   "fill": "$np-accent"
                                 }
@@ -6990,11 +7086,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "AA52P",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "p9rIU",
@@ -7052,17 +7160,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "zrTIv",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "H1MsZ",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "late night patch notes & chill",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "qq3CI",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "zrTIv",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "late night patch notes & chill",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -7253,11 +7381,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "fxK8x",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "fRUvK",
@@ -7274,17 +7414,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "cbSfN",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "q25pb",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "First playthrough — no spoilers please",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "OeGaH",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "cbSfN",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "First playthrough — no spoilers please",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -7475,11 +7635,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "CQCLW",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "gOLiB",
@@ -7496,17 +7668,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "t06DI",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "fD6Sr",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "building a Rust CLI from scratch",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "lF2pN",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "t06DI",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "building a Rust CLI from scratch",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -8499,11 +8691,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "U1EoL",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "zjoxE",
@@ -8561,17 +8765,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "Shavj",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "qJjPr",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "late night patch notes & chill",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "kBBSb",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Shavj",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "late night patch notes & chill",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -8762,11 +8986,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "HrxmU",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "w7MCt",
@@ -8783,17 +9019,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "JZc25",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "TkQrL",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "First playthrough — no spoilers please",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "dO63c",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "JZc25",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "First playthrough — no spoilers please",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -8984,11 +9240,23 @@
                                   "cornerRadius": 5,
                                   "stroke": "$np-border",
                                   "strokeWidth": 1,
+                                  "gap": 5,
                                   "padding": [
                                     3,
                                     8
                                   ],
+                                  "alignItems": "center",
                                   "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "WRAto",
+                                      "name": "Category Icon",
+                                      "width": 11,
+                                      "height": 11,
+                                      "icon": "tag",
+                                      "library": "lucide",
+                                      "fill": "$np-text-muted"
+                                    },
                                     {
                                       "type": "text",
                                       "id": "UrOTO",
@@ -9005,17 +9273,37 @@
                               ]
                             },
                             {
-                              "type": "text",
-                              "id": "RqrAy",
-                              "name": "Title",
-                              "fill": "$np-text-muted",
-                              "textGrowth": "fixed-width",
+                              "type": "frame",
+                              "id": "zy7OM",
+                              "name": "Title Row",
                               "width": "fill_container",
-                              "content": "building a Rust CLI from scratch",
-                              "lineHeight": 1.4,
-                              "fontFamily": "$np-font-body",
-                              "fontSize": 13.5,
-                              "fontWeight": "normal"
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "O59LI0",
+                                  "name": "Title Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "quote",
+                                  "library": "lucide",
+                                  "fill": "$np-text-faint"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "RqrAy",
+                                  "name": "Title",
+                                  "fill": "$np-text-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "building a Rust CLI from scratch",
+                                  "lineHeight": 1.4,
+                                  "fontFamily": "$np-font-body",
+                                  "fontSize": 13.5,
+                                  "fontWeight": "normal"
+                                }
+                              ]
                             },
                             {
                               "type": "text",
@@ -9389,8 +9677,8 @@
     {
       "type": "frame",
       "id": "AUzQL",
-      "x": 1120,
-      "y": 5700,
+      "x": 2083,
+      "y": 5810,
       "name": "— Mascot Studio —",
       "fill": "#0f0c0e",
       "cornerRadius": 16,
@@ -10583,11 +10871,23 @@
                           "cornerRadius": 5,
                           "stroke": "$np-border",
                           "strokeWidth": 1,
+                          "gap": 5,
                           "padding": [
                             3,
                             8
                           ],
+                          "alignItems": "center",
                           "children": [
+                            {
+                              "type": "icon",
+                              "id": "h47uYg",
+                              "name": "Category Icon",
+                              "width": 11,
+                              "height": 11,
+                              "icon": "tag",
+                              "library": "lucide",
+                              "fill": "$np-text-muted"
+                            },
                             {
                               "type": "text",
                               "id": "iY610",
@@ -10604,17 +10904,37 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "Q8cxRo",
-                      "name": "Title",
-                      "fill": "$np-text-muted",
-                      "textGrowth": "fixed-width",
+                      "type": "frame",
+                      "id": "gvzaE",
+                      "name": "Title Row",
                       "width": "fill_container",
-                      "content": "late night patch notes & chill",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$np-font-body",
-                      "fontSize": 13.5,
-                      "fontWeight": "normal"
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ajGzA",
+                          "name": "Title Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "quote",
+                          "library": "lucide",
+                          "fill": "$np-text-faint"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Q8cxRo",
+                          "name": "Title",
+                          "fill": "$np-text-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "late night patch notes & chill",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$np-font-body",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -10831,11 +11151,23 @@
                           "cornerRadius": 5,
                           "stroke": "$np-border",
                           "strokeWidth": 1,
+                          "gap": 5,
                           "padding": [
                             3,
                             8
                           ],
+                          "alignItems": "center",
                           "children": [
+                            {
+                              "type": "icon",
+                              "id": "Y8yHn",
+                              "name": "Category Icon",
+                              "width": 11,
+                              "height": 11,
+                              "icon": "tag",
+                              "library": "lucide",
+                              "fill": "$np-text-muted"
+                            },
                             {
                               "type": "text",
                               "id": "a8Bq8o",
@@ -10852,17 +11184,37 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "Y94nY",
-                      "name": "Title",
-                      "fill": "$np-text-muted",
-                      "textGrowth": "fixed-width",
+                      "type": "frame",
+                      "id": "dewPQ",
+                      "name": "Title Row",
                       "width": "fill_container",
-                      "content": "late night patch notes & chill",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$np-font-body",
-                      "fontSize": 13.5,
-                      "fontWeight": "normal"
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "VhbLS",
+                          "name": "Title Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "quote",
+                          "library": "lucide",
+                          "fill": "$np-text-faint"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Y94nY",
+                          "name": "Title",
+                          "fill": "$np-text-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "late night patch notes & chill",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$np-font-body",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -11085,11 +11437,23 @@
                           "cornerRadius": 5,
                           "stroke": "$np-border",
                           "strokeWidth": 1,
+                          "gap": 5,
                           "padding": [
                             3,
                             8
                           ],
+                          "alignItems": "center",
                           "children": [
+                            {
+                              "type": "icon",
+                              "id": "G5aTe",
+                              "name": "Category Icon",
+                              "width": 11,
+                              "height": 11,
+                              "icon": "tag",
+                              "library": "lucide",
+                              "fill": "$np-text-muted"
+                            },
                             {
                               "type": "text",
                               "id": "jkAaU",
@@ -11147,17 +11511,37 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "SI73f",
-                      "name": "Title",
-                      "fill": "$np-text-muted",
-                      "textGrowth": "fixed-width",
+                      "type": "frame",
+                      "id": "R5qBq2",
+                      "name": "Title Row",
                       "width": "fill_container",
-                      "content": "late night patch notes & chill",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$np-font-body",
-                      "fontSize": 13.5,
-                      "fontWeight": "normal"
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "yK3m2",
+                          "name": "Title Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "quote",
+                          "library": "lucide",
+                          "fill": "$np-text-faint"
+                        },
+                        {
+                          "type": "text",
+                          "id": "SI73f",
+                          "name": "Title",
+                          "fill": "$np-text-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "late night patch notes & chill",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$np-font-body",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -11381,11 +11765,23 @@
                           "cornerRadius": 5,
                           "stroke": "$np-border",
                           "strokeWidth": 1,
+                          "gap": 5,
                           "padding": [
                             3,
                             8
                           ],
+                          "alignItems": "center",
                           "children": [
+                            {
+                              "type": "icon",
+                              "id": "kPLM4",
+                              "name": "Category Icon",
+                              "width": 11,
+                              "height": 11,
+                              "icon": "tag",
+                              "library": "lucide",
+                              "fill": "$np-text-muted"
+                            },
                             {
                               "type": "text",
                               "id": "we3Zp",
@@ -11402,17 +11798,37 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "UrfKv",
-                      "name": "Title",
-                      "fill": "$np-text-muted",
-                      "textGrowth": "fixed-width",
+                      "type": "frame",
+                      "id": "ocMZM",
+                      "name": "Title Row",
                       "width": "fill_container",
-                      "content": "late night patch notes & chill",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$np-font-body",
-                      "fontSize": 13.5,
-                      "fontWeight": "normal"
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "O9syk",
+                          "name": "Title Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "quote",
+                          "library": "lucide",
+                          "fill": "$np-text-faint"
+                        },
+                        {
+                          "type": "text",
+                          "id": "UrfKv",
+                          "name": "Title",
+                          "fill": "$np-text-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "late night patch notes & chill",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$np-font-body",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -11629,11 +12045,23 @@
                           "cornerRadius": 5,
                           "stroke": "$np-border",
                           "strokeWidth": 1,
+                          "gap": 5,
                           "padding": [
                             3,
                             8
                           ],
+                          "alignItems": "center",
                           "children": [
+                            {
+                              "type": "icon",
+                              "id": "cDURz",
+                              "name": "Category Icon",
+                              "width": 11,
+                              "height": 11,
+                              "icon": "tag",
+                              "library": "lucide",
+                              "fill": "$np-text-muted"
+                            },
                             {
                               "type": "text",
                               "id": "S2O6nO",
@@ -11691,17 +12119,37 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "eTSuj",
-                      "name": "Title",
-                      "fill": "$np-text-muted",
-                      "textGrowth": "fixed-width",
+                      "type": "frame",
+                      "id": "KlSgf",
+                      "name": "Title Row",
                       "width": "fill_container",
-                      "content": "late night patch notes & chill",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$np-font-body",
-                      "fontSize": 13.5,
-                      "fontWeight": "normal"
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "p07aF3",
+                          "name": "Title Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "quote",
+                          "library": "lucide",
+                          "fill": "$np-text-faint"
+                        },
+                        {
+                          "type": "text",
+                          "id": "eTSuj",
+                          "name": "Title",
+                          "fill": "$np-text-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "late night patch notes & chill",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$np-font-body",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -11714,6 +12162,573 @@
                       "fontWeight": "normal"
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Q0sy5",
+      "x": 1120,
+      "y": 7298,
+      "name": "— Title / Category Icon Options —",
+      "width": 820,
+      "fill": "#0f0c0e",
+      "cornerRadius": 16,
+      "stroke": "#241a1f",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "gap": 18,
+      "padding": 28,
+      "children": [
+        {
+          "type": "text",
+          "id": "FdXy2",
+          "name": "Caption",
+          "fill": "$np-text-faint",
+          "content": "STREAM TITLE",
+          "fontFamily": "$np-font-mono",
+          "fontSize": 10.5,
+          "fontWeight": "normal",
+          "letterSpacing": 1.3
+        },
+        {
+          "type": "frame",
+          "id": "gtJDe",
+          "name": "Row STREAM TITLE",
+          "width": "fill_container",
+          "gap": 10,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ox7QW",
+              "name": "Cell type",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rRz6c",
+                  "name": "Sample",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "rjmJV",
+                      "name": "Icon",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "type",
+                      "library": "lucide",
+                      "fill": "$np-text-faint"
+                    },
+                    {
+                      "type": "text",
+                      "id": "o5Dat",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "late night patch notes",
+                      "fontFamily": "$np-font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "AlCTM",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "type",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rwr5L",
+              "name": "Cell file-text",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "AENKJ",
+                  "name": "Sample",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "XnKUI",
+                      "name": "Icon",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "file-text",
+                      "library": "lucide",
+                      "fill": "$np-text-faint"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zTBG2",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "late night patch notes",
+                      "fontFamily": "$np-font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "bMIia",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "file-text",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UcxYA",
+              "name": "Cell quote",
+              "width": "fill_container",
+              "fill": "#ff3d8b14",
+              "cornerRadius": 8,
+              "stroke": "$np-accent",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "VjSEN",
+                  "name": "Sample",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "piMXU",
+                      "name": "Icon",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "quote",
+                      "library": "lucide",
+                      "fill": "$np-text-faint"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pKLyM",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "late night patch notes",
+                      "fontFamily": "$np-font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "ElXnI",
+                  "name": "Name",
+                  "fill": "$np-accent",
+                  "content": "quote  ◀",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zpMSE",
+              "name": "Cell captions",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RurLn",
+                  "name": "Sample",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "uT5D8",
+                      "name": "Icon",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "captions",
+                      "library": "lucide",
+                      "fill": "$np-text-faint"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nqGZn",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "late night patch notes",
+                      "fontFamily": "$np-font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Opcuh",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "captions",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "AWXkq",
+          "name": "Caption",
+          "fill": "$np-text-faint",
+          "content": "STREAM CATEGORY",
+          "fontFamily": "$np-font-mono",
+          "fontSize": 10.5,
+          "fontWeight": "normal",
+          "letterSpacing": 1.3
+        },
+        {
+          "type": "frame",
+          "id": "K0IKYi",
+          "name": "Row STREAM CATEGORY",
+          "width": "fill_container",
+          "gap": 10,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "d6sFv",
+              "name": "Cell gamepad-2",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wXxYJ",
+                  "name": "Sample Pill",
+                  "fill": "$np-surface-2",
+                  "cornerRadius": 5,
+                  "stroke": "$np-border",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "e3Hr6W",
+                      "name": "Icon",
+                      "width": 11,
+                      "height": 11,
+                      "icon": "gamepad-2",
+                      "library": "lucide",
+                      "fill": "$np-text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Wv3m4",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "JUST CHATTING",
+                      "fontFamily": "$np-font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "DXtGS",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "gamepad-2",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MOjNN",
+              "name": "Cell tag",
+              "width": "fill_container",
+              "fill": "#ff3d8b14",
+              "cornerRadius": 8,
+              "stroke": "$np-accent",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "urOgA",
+                  "name": "Sample Pill",
+                  "fill": "$np-surface-2",
+                  "cornerRadius": 5,
+                  "stroke": "$np-border",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "J9wSOX",
+                      "name": "Icon",
+                      "width": 11,
+                      "height": 11,
+                      "icon": "tag",
+                      "library": "lucide",
+                      "fill": "$np-text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "j1VzUP",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "JUST CHATTING",
+                      "fontFamily": "$np-font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "o9k3Hj",
+                  "name": "Name",
+                  "fill": "$np-accent",
+                  "content": "tag  ◀",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HpezT",
+              "name": "Cell layout-grid",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Xudc5",
+                  "name": "Sample Pill",
+                  "fill": "$np-surface-2",
+                  "cornerRadius": 5,
+                  "stroke": "$np-border",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "P9UVdt",
+                      "name": "Icon",
+                      "width": 11,
+                      "height": 11,
+                      "icon": "layout-grid",
+                      "library": "lucide",
+                      "fill": "$np-text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jD7kq",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "JUST CHATTING",
+                      "fontFamily": "$np-font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "WJJMd",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "layout-grid",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ampsg",
+              "name": "Cell folder",
+              "width": "fill_container",
+              "fill": "$np-surface",
+              "cornerRadius": 8,
+              "stroke": "$np-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                12,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "s84s7",
+                  "name": "Sample Pill",
+                  "fill": "$np-surface-2",
+                  "cornerRadius": 5,
+                  "stroke": "$np-border",
+                  "strokeWidth": 1,
+                  "gap": 5,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "gusOg",
+                      "name": "Icon",
+                      "width": 11,
+                      "height": 11,
+                      "icon": "folder",
+                      "library": "lucide",
+                      "fill": "$np-text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yQAFL",
+                      "name": "Sample Text",
+                      "fill": "$np-text-muted",
+                      "content": "JUST CHATTING",
+                      "fontFamily": "$np-font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "w8cOU",
+                  "name": "Name",
+                  "fill": "$np-text-faint",
+                  "content": "folder",
+                  "fontFamily": "$np-font-mono",
+                  "fontSize": 9.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.5
                 }
               ]
             }
