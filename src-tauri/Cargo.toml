@@ -30,9 +30,10 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 tokio = { version = "1", features = ["time", "rt", "macros"] }
 # `keyring` has NO default features — without an explicit backend, it silently falls back
 # to a per-Entry-instance in-memory mock store (that's what caused write-then-read-elsewhere
-# to fail). "windows-native" is confirmed for this app's current Windows target; add the
-# equivalent feature(s) before building for macOS/Linux.
-keyring = { version = "3", features = ["windows-native"] }
+# to fail). "windows-native" is confirmed for this app's current Windows target; "linux-native"
+# uses the kernel keyring (keyutils) on Linux — no secret-service daemon required. Add the
+# equivalent feature before building for macOS.
+keyring = { version = "3", features = ["windows-native", "linux-native"] }
 anyhow = "1"
 
 
