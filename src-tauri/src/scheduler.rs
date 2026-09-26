@@ -505,6 +505,21 @@ pub(crate) fn send_desktop_notification(app: &AppHandle, title: &str, body: &str
 #[cfg(windows)]
 const WINDOWS_TOAST_AUM_ID: &str = "com.twitchtrack.app";
 
+/// The toast's app icon (bundled as a Tauri resource — see tauri.conf.json's
+/// `bundle.resources` — so it sits next to the installed exe). `tauri dev`/`cargo run`
+/// don't copy bundle resources, so dev builds fall back to the source icon directly.
+#[cfg(windows)]
+fn windows_toast_icon_path(app: &AppHandle) -> Option<std::path::PathBuf> {
+    use tauri::path::BaseDirectory;
+    if let Ok(path) = app.path().resolve("notification-icon.png", BaseDirectory::Resource) {
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    let dev_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("icons/128x128.png");
+    dev_path.exists().then_some(dev_path)
+}
+
 #[cfg(windows)]
 fn send_windows_toast(
     app: &AppHandle,
@@ -513,17 +528,18 @@ fn send_windows_toast(
     url: Option<&str>,
 ) -> winrt_toast::Result<()> {
     use std::sync::Once;
-    use winrt_toast::{Toast, ToastManager};
+    use winrt_toast::content::image::ImagePlacement;
+    use winrt_toast::{Image, Toast, ToastManager};
+
+    let icon_path = windows_toast_icon_path(app);
 
     // Registration is a one-time (well, once-per-process — it's cheap enough that
     // redoing it on every run doesn't matter) registry write; Show doesn't need it
     // redone per-toast.
     static REGISTER: Once = Once::new();
     REGISTER.call_once(|| {
-        if let Ok(exe) = tauri::utils::platform::current_exe() {
-            if let Err(e) = winrt_toast::register(WINDOWS_TOAST_AUM_ID, "TwitchTrack", Some(&exe)) {
-                eprintln!("failed to register windows toast AUMID: {e}");
-            }
+        if let Err(e) = winrt_toast::register(WINDOWS_TOAST_AUM_ID, "TwitchTrack", icon_path.as_deref()) {
+            eprintln!("failed to register windows toast AUMID: {e}");
         }
     });
 
@@ -532,6 +548,11 @@ fn send_windows_toast(
     toast.text1(title).text2(body);
     if let Some(url) = url {
         toast.launch(url);
+    }
+    if let Some(icon_path) = &icon_path {
+        if let Ok(image) = Image::new_local(icon_path) {
+            toast.image(1, image.with_placement(ImagePlacement::AppLogoOverride));
+        }
     }
 
     let app = app.clone();
