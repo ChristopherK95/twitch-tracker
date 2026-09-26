@@ -425,6 +425,27 @@ pub fn simulate_notification(app: AppHandle, db: State<'_, Db>, kind: String) ->
     };
     drop(conn);
 
+    let (toast_title, toast_body) = match payload.event_type {
+        "go_live" => (
+            format!("{display_name} is live"),
+            format!("{} — {}", payload.category.as_deref().unwrap_or(""), payload.title.as_deref().unwrap_or("")),
+        ),
+        "go_offline" => (
+            format!("{display_name} went offline"),
+            "Simulated notification (dev only)".to_string(),
+        ),
+        _ => (
+            format!("{display_name} updated their stream"),
+            "Simulated notification (dev only)".to_string(),
+        ),
+    };
+    crate::scheduler::send_desktop_notification(
+        &app,
+        &toast_title,
+        &toast_body,
+        Some(&format!("https://twitch.tv/{login}")),
+    );
+
     let _ = app.emit("notification-created", payload);
     Ok(())
 }

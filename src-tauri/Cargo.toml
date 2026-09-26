@@ -36,6 +36,11 @@ tokio = { version = "1", features = ["time", "rt", "macros"] }
 keyring = { version = "3", features = ["windows-native", "linux-native"] }
 anyhow = "1"
 
+[target.'cfg(windows)'.dependencies]
+# Windows-only: lets a clicked notification open the streamer's URL (Activated event),
+# which tauri-plugin-notification's desktop backend does not expose at all.
+winrt-toast = "0.1"
+
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

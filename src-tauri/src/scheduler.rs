@@ -184,6 +184,7 @@ async fn tick_once(
                 app,
                 "TwitchTrack disconnected from Twitch",
                 "Reconnect in Settings to keep tracking your Watchlist.",
+                None,
             );
             return Err(TickError::NotConnected);
         }
@@ -238,6 +239,7 @@ async fn tick_once(
                         app,
                         &format!("{} is live", row.display_name),
                         &format!("{} — {}", s.category, s.title),
+                        Some(&format!("https://twitch.tv/{}", row.login)),
                     );
                     let _ = app.emit(
                         "notification-created",
@@ -281,6 +283,7 @@ async fn tick_once(
                         app,
                         &format!("{} went offline", row.display_name),
                         &format!("after {}", format_duration(duration_seconds)),
+                        Some(&format!("https://twitch.tv/{}", row.login)),
                     );
                     let _ = app.emit(
                         "notification-created",
@@ -404,6 +407,7 @@ async fn tick_once(
                                         &track.confirmed_category,
                                         &s.category,
                                     ),
+                                    Some(&format!("https://twitch.tv/{}", row.login)),
                                 );
                             }
                             track.confirmed_title = s.title.clone();
@@ -474,11 +478,79 @@ fn metadata_change_summary(
     parts.join(" and ")
 }
 
-fn send_desktop_notification(app: &AppHandle, title: &str, body: &str) {
-    use tauri_plugin_notification::NotificationExt;
-    if let Err(e) = app.notification().builder().title(title).body(body).show() {
-        eprintln!("failed to send desktop notification: {e}");
+/// `url`, when given, is opened in the OS default browser if the user clicks the toast
+/// (Windows only — see `send_windows_toast`; other platforms show the toast but can't
+/// react to a click at all, since tauri-plugin-notification doesn't expose that event).
+pub(crate) fn send_desktop_notification(app: &AppHandle, title: &str, body: &str, url: Option<&str>) {
+    #[cfg(windows)]
+    {
+        if let Err(e) = send_windows_toast(app, title, body, url) {
+            eprintln!("failed to send desktop notification: {e}");
+        }
     }
+    #[cfg(not(windows))]
+    {
+        let _ = url;
+        use tauri_plugin_notification::NotificationExt;
+        if let Err(e) = app.notification().builder().title(title).body(body).show() {
+            eprintln!("failed to send desktop notification: {e}");
+        }
+    }
+}
+
+/// AUMID (Application User Model ID) `winrt-toast` registers under
+/// `HKCU\SOFTWARE\Classes\AppUserModelId` so Windows accepts toasts from this unpackaged
+/// exe. Reuses the Tauri bundle identifier (tauri.conf.json) for consistency, though the
+/// two registrations are otherwise unrelated.
+#[cfg(windows)]
+const WINDOWS_TOAST_AUM_ID: &str = "com.twitchtrack.app";
+
+#[cfg(windows)]
+fn send_windows_toast(
+    app: &AppHandle,
+    title: &str,
+    body: &str,
+    url: Option<&str>,
+) -> winrt_toast::Result<()> {
+    use std::sync::Once;
+    use winrt_toast::{Toast, ToastManager};
+
+    // Registration is a one-time (well, once-per-process — it's cheap enough that
+    // redoing it on every run doesn't matter) registry write; Show doesn't need it
+    // redone per-toast.
+    static REGISTER: Once = Once::new();
+    REGISTER.call_once(|| {
+        if let Ok(exe) = tauri::utils::platform::current_exe() {
+            if let Err(e) = winrt_toast::register(WINDOWS_TOAST_AUM_ID, "TwitchTrack", Some(&exe)) {
+                eprintln!("failed to register windows toast AUMID: {e}");
+            }
+        }
+    });
+
+    let manager = ToastManager::new(WINDOWS_TOAST_AUM_ID);
+    let mut toast = Toast::new();
+    toast.text1(title).text2(body);
+    if let Some(url) = url {
+        toast.launch(url);
+    }
+
+    let app = app.clone();
+    manager.show_with_callbacks(
+        &toast,
+        Some(Box::new(move |activated| {
+            // `activated` is the toast's `launch` value when the user clicks the toast
+            // body itself (this app defines no action buttons, so there's no other
+            // source of arguments here).
+            if let Ok(url) = activated {
+                if !url.is_empty() {
+                    use tauri_plugin_opener::OpenerExt;
+                    let _ = app.opener().open_url(url, None::<&str>);
+                }
+            }
+        })),
+        None,
+        Some(Box::new(|e| eprintln!("windows toast failed to show: {e:?}"))),
+    )
 }
 
 fn format_duration(seconds: i64) -> String {
