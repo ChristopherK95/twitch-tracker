@@ -1,8 +1,19 @@
 import { useEffect, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
+import { check as checkForUpdate, type Update } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 import { commands, openInBrowser, type AuthStatus, type NotificationKind, type SettingsRow } from "../../lib/tauri";
 import { PanelBottomIcon, PlugIcon, UnplugIcon, UserRoundIcon } from "../../components/icons";
 import { DEV_KEYBINDS } from "../../lib/devKeybinds";
 import "./Settings.css";
+
+type UpdateStatus =
+  | { kind: "idle" }
+  | { kind: "checking" }
+  | { kind: "up-to-date" }
+  | { kind: "available"; update: Update }
+  | { kind: "installing"; downloaded: number; total: number | null }
+  | { kind: "error"; message: string };
 
 interface SettingsProps {
   authStatus: AuthStatus;
@@ -12,10 +23,46 @@ export function Settings({ authStatus }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsRow | null>(null);
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ kind: "idle" });
 
   useEffect(() => {
     commands.getSettings().then(setSettings);
   }, [authStatus]);
+
+  useEffect(() => {
+    getVersion().then(setAppVersion);
+  }, []);
+
+  async function handleCheckForUpdate() {
+    setUpdateStatus({ kind: "checking" });
+    try {
+      const update = await checkForUpdate();
+      setUpdateStatus(update ? { kind: "available", update } : { kind: "up-to-date" });
+    } catch (e) {
+      setUpdateStatus({ kind: "error", message: String(e) });
+    }
+  }
+
+  async function installUpdate(update: Update) {
+    setUpdateStatus({ kind: "installing", downloaded: 0, total: null });
+    try {
+      await update.downloadAndInstall((event) => {
+        if (event.event === "Started") {
+          setUpdateStatus({ kind: "installing", downloaded: 0, total: event.data.contentLength ?? null });
+        } else if (event.event === "Progress") {
+          setUpdateStatus((s) =>
+            s.kind === "installing"
+              ? { kind: "installing", downloaded: s.downloaded + event.data.chunkLength, total: s.total }
+              : s,
+          );
+        }
+      });
+      await relaunch();
+    } catch (e) {
+      setUpdateStatus({ kind: "error", message: String(e) });
+    }
+  }
 
   async function connect() {
     setConnectBusy(true);
@@ -156,6 +203,61 @@ export function Settings({ authStatus }: SettingsProps) {
               it for good.
             </span>
           </div>
+        </div>
+
+        <div className="dash-card">
+          <div className="card-title-row">
+            <h2 className="card-title">About</h2>
+            <span className="rule" />
+          </div>
+          <div className="field-row">
+            <div>
+              <div className="field-label">TwitchTrack{appVersion ? ` v${appVersion}` : ""}</div>
+              <div className="field-desc">
+                {updateStatus.kind === "idle" && "Check GitHub for a newer release."}
+                {updateStatus.kind === "checking" && "Checking for updates…"}
+                {updateStatus.kind === "up-to-date" && "You're on the latest version."}
+                {updateStatus.kind === "available" &&
+                  `Version ${updateStatus.update.version} is available.`}
+                {updateStatus.kind === "installing" &&
+                  (updateStatus.total
+                    ? `Downloading update… ${Math.round((updateStatus.downloaded / updateStatus.total) * 100)}%`
+                    : "Downloading update…")}
+                {updateStatus.kind === "error" && (
+                  <span style={{ color: "var(--warn)" }}>{updateStatus.message}</span>
+                )}
+              </div>
+            </div>
+            {(updateStatus.kind === "idle" ||
+              updateStatus.kind === "checking" ||
+              updateStatus.kind === "up-to-date" ||
+              updateStatus.kind === "error") && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={handleCheckForUpdate}
+                disabled={updateStatus.kind === "checking"}
+              >
+                {updateStatus.kind === "checking" ? "Checking…" : "Check for Updates"}
+              </button>
+            )}
+            {updateStatus.kind === "available" && (
+              <button className="btn btn-primary btn-sm" onClick={() => installUpdate(updateStatus.update)}>
+                Install
+              </button>
+            )}
+          </div>
+          {updateStatus.kind === "installing" && (
+            <div className="update-progress">
+              <div
+                className="update-progress-bar"
+                style={{
+                  width: updateStatus.total
+                    ? `${Math.min(100, (updateStatus.downloaded / updateStatus.total) * 100)}%`
+                    : "35%",
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {import.meta.env.DEV && (

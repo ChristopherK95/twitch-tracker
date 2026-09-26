@@ -54,6 +54,10 @@ jobs:
           # linuxdeploy bundles an old `strip` that chokes on the `.relr.dyn` section
           # in current system libraries — see package.json's `tauri` script.
           NO_STRIP: 1
+          # Signs the updater artifacts (and makes tauri-action emit latest.json) — see
+          # src-tauri/tauri.conf.json's plugins.updater.pubkey for the matching public half.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "TwitchTrack ${{ github.ref_name }}"
