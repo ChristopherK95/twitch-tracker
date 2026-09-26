@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { commands, type ChannelSearchResult, type WatchlistEntry } from "../../lib/tauri";
-import { ArrowUpRightIcon, EyeIcon, PlusIcon, SearchIcon } from "../../components/icons";
+import { ArrowUpRightIcon, ChevronDownIcon, ChevronUpIcon, EyeIcon, PlusIcon, SearchIcon } from "../../components/icons";
 import "./Watchlist.css";
 
 const FRESH_THRESHOLD_SECONDS = 5 * 60;
@@ -54,6 +54,9 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rowRefs = useRef(new Map<number, HTMLDivElement>());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const titleRefs = useRef(new Map<number, HTMLDivElement>());
+  const [expandedTitles, setExpandedTitles] = useState<Set<number>>(new Set());
+  const [overflowingTitles, setOverflowingTitles] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     commands.getWatchlist().then(setEntries).catch((e) => setError(String(e)));
@@ -63,6 +66,32 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
     if (highlightUserId === null) return;
     rowRefs.current.get(highlightUserId)?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [entries, highlightUserId]);
+
+  // The expand/collapse toggle only makes sense (and its chevron only shows) when the
+  // title is actually being clipped — measured directly off the collapsed, single-line
+  // element rather than guessed from character count, since that depends on the font,
+  // window width, and category-pill/name length sharing the same row.
+  useLayoutEffect(() => {
+    function recomputeOverflow() {
+      const next = new Set<number>();
+      for (const [userId, el] of titleRefs.current) {
+        if (!expandedTitles.has(userId) && el.scrollWidth > el.clientWidth + 1) next.add(userId);
+      }
+      setOverflowingTitles(next);
+    }
+    recomputeOverflow();
+    window.addEventListener("resize", recomputeOverflow);
+    return () => window.removeEventListener("resize", recomputeOverflow);
+  }, [entries, expandedTitles]);
+
+  function toggleTitle(userId: number) {
+    setExpandedTitles((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -186,6 +215,8 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
         <div className="live-list">
           {live.map((s) => {
             const fresh = s.started_at !== null && Date.now() / 1000 - s.started_at < FRESH_THRESHOLD_SECONDS;
+            const titleExpanded = expandedTitles.has(s.user_id);
+            const titleCanToggle = titleExpanded || overflowingTitles.has(s.user_id);
             return (
               <div
                 className={`row row--live ${fresh ? "row--fresh" : ""} ${
@@ -230,7 +261,26 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
                     <span className="spacer" />
                     {fresh && <span className="fresh-tag">JUST WENT LIVE</span>}
                   </div>
-                  <div className="row-title">{s.title}</div>
+                  <div className={`row-title-row ${titleExpanded ? "row-title-row--expanded" : ""}`}>
+                    <div
+                      className={`row-title ${titleExpanded ? "row-title--expanded" : ""}`}
+                      ref={(el) => {
+                        if (el) titleRefs.current.set(s.user_id, el);
+                        else titleRefs.current.delete(s.user_id);
+                      }}
+                    >
+                      {s.title}
+                    </div>
+                    {titleCanToggle && (
+                      <button
+                        className={`title-toggle-btn ${titleExpanded ? "title-toggle-btn--expanded" : ""}`}
+                        onClick={() => toggleTitle(s.user_id)}
+                        title={titleExpanded ? "Collapse title" : "Show full title"}
+                      >
+                        {titleExpanded ? <ChevronUpIcon size={12} /> : <ChevronDownIcon size={12} />}
+                      </button>
+                    )}
+                  </div>
                   <div className="row-stats">
                     <span>{s.started_at ? formatElapsed(s.started_at) : ""} elapsed</span>
                   </div>

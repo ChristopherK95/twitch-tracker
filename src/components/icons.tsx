@@ -10,6 +10,7 @@ export {
   Trash2 as TrashIcon,
   TriangleAlert as TriangleAlertIcon,
   ChevronDown as ChevronDownIcon,
+  ChevronUp as ChevronUpIcon,
   Pencil as PencilIcon,
   UserRound as UserRoundIcon,
   PanelBottom as PanelBottomIcon,
