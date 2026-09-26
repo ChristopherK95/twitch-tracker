@@ -52,13 +52,8 @@ body {
 }
 
 .wordmark {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
   display: flex;
   align-items: center;
-  gap: 11px;
   flex-shrink: 0;
 }
 

@@ -27,8 +27,7 @@ function TopBar({ children }: { children?: React.ReactNode }) {
   return (
     <div className="topbar">
       <div className="wordmark">
-        <img src={mascotMark} alt="" className="mascot-mark" />
-        TWITCHTRACK
+        <img src={mascotMark} alt="TwitchTrack" className="mascot-mark" />
       </div>
       {children}
     </div>
