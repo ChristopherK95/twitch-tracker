@@ -214,8 +214,14 @@ async fn tick_once(
     for row in &rows {
         let track = tracks.entry(row.user_id).or_default();
         let fresh = fresh_by_id.get(&row.user_id).copied();
+        // Live now under a different Stream Session than the one we're tracking — the
+        // previous session ended while we weren't polling (app closed, PC asleep, or an
+        // offline gap shorter than a tick), so no Go-Offline edge was ever seen. Treat
+        // it as a fresh Go-Live; otherwise the old session's started_at carries over and
+        // the eventual Go-Offline reports the combined duration of both streams.
+        let new_session = track.is_live && fresh.is_some_and(|s| s.started_at != track.started_at);
 
-        match (fresh, track.is_live) {
+        match (fresh, track.is_live && !new_session) {
             (Some(s), false) => {
                 // Go-Live. Timestamp the Notification at Twitch's real Stream Session
                 // start (s.started_at), not "now" (when we happened to detect it) —
