@@ -439,12 +439,19 @@ pub fn simulate_notification(app: AppHandle, db: State<'_, Db>, kind: String) ->
             "Simulated notification (dev only)".to_string(),
         ),
     };
-    crate::scheduler::send_desktop_notification(
-        &app,
-        &toast_title,
-        &toast_body,
-        Some(&format!("https://twitch.tv/{login}")),
-    );
+    let url = format!("https://twitch.tv/{login}");
+    let avatar_url = target.as_ref().and_then(|r| r.profile_image_url.clone());
+    let toast_app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let avatar = crate::scheduler::cached_avatar(&toast_app, user_id, avatar_url.as_deref()).await;
+        crate::scheduler::send_desktop_notification(
+            &toast_app,
+            &toast_title,
+            &toast_body,
+            Some(&url),
+            avatar.as_deref(),
+        );
+    });
 
     let _ = app.emit("notification-created", payload);
     Ok(())

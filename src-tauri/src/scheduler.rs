@@ -13,6 +13,7 @@ use crate::db::{notifications, settings, watchlist, Db};
 use crate::live_cache::{LiveCache, LiveEntry};
 use crate::twitch::{self, StreamInfo};
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -185,6 +186,7 @@ async fn tick_once(
                 "TwitchTrack disconnected from Twitch",
                 "Reconnect in Settings to keep tracking your Watchlist.",
                 None,
+                None,
             );
             return Err(TickError::NotConnected);
         }
@@ -228,6 +230,7 @@ async fn tick_once(
                 // otherwise a streamer already live when the app launches (or found
                 // after any polling gap) shows a misleading "just went live" time.
                 if toggles.go_live && !suppress_notifications {
+                    let avatar = cached_avatar(app, row.user_id, row.profile_image_url.as_deref()).await;
                     let conn = db.0.lock().unwrap();
                     let _ = notifications::insert_go_live(
                         &conn,
@@ -246,6 +249,7 @@ async fn tick_once(
                         &format!("{} is live", row.display_name),
                         &format!("{} — {}", s.category, s.title),
                         Some(&format!("https://twitch.tv/{}", row.login)),
+                        avatar.as_deref(),
                     );
                     let _ = app.emit(
                         "notification-created",
@@ -273,6 +277,7 @@ async fn tick_once(
                 // Go-Offline
                 let duration_seconds = (now - track.started_at).max(0);
                 if toggles.go_offline && !suppress_notifications {
+                    let avatar = cached_avatar(app, row.user_id, row.profile_image_url.as_deref()).await;
                     let conn = db.0.lock().unwrap();
                     let _ = notifications::insert_go_offline(
                         &conn,
@@ -290,6 +295,7 @@ async fn tick_once(
                         &format!("{} went offline", row.display_name),
                         &format!("after {}", format_duration(duration_seconds)),
                         Some(&format!("https://twitch.tv/{}", row.login)),
+                        avatar.as_deref(),
                     );
                     let _ = app.emit(
                         "notification-created",
@@ -335,6 +341,8 @@ async fn tick_once(
                             let title_changed = s.title != track.confirmed_title;
                             let category_changed = s.category != track.confirmed_category;
                             if toggles.metadata_change && !suppress_notifications {
+                                let avatar =
+                                    cached_avatar(app, row.user_id, row.profile_image_url.as_deref()).await;
                                 let conn = db.0.lock().unwrap();
                                 // Desktop notifications combine both changes into one toast
                                 // (see below), but the in-app Notification Log reads better
@@ -414,6 +422,7 @@ async fn tick_once(
                                         &s.category,
                                     ),
                                     Some(&format!("https://twitch.tv/{}", row.login)),
+                                    avatar.as_deref(),
                                 );
                             }
                             track.confirmed_title = s.title.clone();
@@ -487,10 +496,19 @@ fn metadata_change_summary(
 /// `url`, when given, is opened in the OS default browser if the user clicks the toast
 /// (Windows only — see `send_windows_toast`; other platforms show the toast but can't
 /// react to a click at all, since tauri-plugin-notification doesn't expose that event).
-pub(crate) fn send_desktop_notification(app: &AppHandle, title: &str, body: &str, url: Option<&str>) {
+/// `avatar`, when given, is a local image (see `cached_avatar`) shown as the toast's main
+/// image in place of the app icon — the app icon still identifies TwitchTrack in the
+/// toast's header.
+pub(crate) fn send_desktop_notification(
+    app: &AppHandle,
+    title: &str,
+    body: &str,
+    url: Option<&str>,
+    avatar: Option<&Path>,
+) {
     #[cfg(windows)]
     {
-        if let Err(e) = send_windows_toast(app, title, body, url) {
+        if let Err(e) = send_windows_toast(app, title, body, url, avatar) {
             eprintln!("failed to send desktop notification: {e}");
         }
     }
@@ -498,10 +516,64 @@ pub(crate) fn send_desktop_notification(app: &AppHandle, title: &str, body: &str
     {
         let _ = url;
         use tauri_plugin_notification::NotificationExt;
-        if let Err(e) = app.notification().builder().title(title).body(body).show() {
+        let mut builder = app.notification().builder().title(title).body(body);
+        if let Some(avatar) = avatar {
+            builder = builder.icon(avatar.to_string_lossy());
+        }
+        if let Err(e) = builder.show() {
             eprintln!("failed to send desktop notification: {e}");
         }
     }
+}
+
+/// Local copy of a streamer's profile picture for use in a desktop notification — toasts
+/// from an unpackaged Windows app can only show local images, not http(s) URLs. Cached
+/// under the app cache dir, keyed by user id plus the image URL's file name (Twitch gives
+/// each uploaded picture a new name), so it's downloaded once per picture. `None` (the
+/// notification falls back to the app icon) if there's no URL or the download fails.
+pub(crate) async fn cached_avatar(app: &AppHandle, user_id: i64, url: Option<&str>) -> Option<PathBuf> {
+    let url = url.filter(|u| !u.is_empty())?;
+    let file_name: String = url
+        .rsplit('/')
+        .next()?
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '.' { c } else { '_' })
+        .collect();
+    let dir = app.path().app_cache_dir().ok()?.join("avatars");
+    let user_prefix = format!("{user_id}-");
+    let path = dir.join(format!("{user_prefix}{file_name}"));
+    if path.exists() {
+        return Some(path);
+    }
+
+    let http = app.state::<reqwest::Client>();
+    let bytes = async {
+        http.get(url)
+            .timeout(Duration::from_secs(5))
+            .send()
+            .await?
+            .error_for_status()?
+            .bytes()
+            .await
+    }
+    .await
+    .map_err(|e| eprintln!("failed to download avatar for notification: {e}"))
+    .ok()?;
+
+    std::fs::create_dir_all(&dir).ok()?;
+    // Drop this streamer's previous picture(s) — superseded by this one.
+    if let Ok(entries) = std::fs::read_dir(&dir) {
+        for entry in entries.flatten() {
+            if entry.file_name().to_string_lossy().starts_with(&user_prefix) {
+                let _ = std::fs::remove_file(entry.path());
+            }
+        }
+    }
+    // Write-then-rename so a concurrent toast never picks up a half-written file.
+    let tmp = dir.join(format!("{user_prefix}{file_name}.tmp"));
+    std::fs::write(&tmp, &bytes).ok()?;
+    std::fs::rename(&tmp, &path).ok()?;
+    Some(path)
 }
 
 /// AUMID (Application User Model ID) `winrt-toast` registers under
@@ -511,19 +583,35 @@ pub(crate) fn send_desktop_notification(app: &AppHandle, title: &str, body: &str
 #[cfg(windows)]
 const WINDOWS_TOAST_AUM_ID: &str = "com.twitchtrack.app";
 
-/// The toast's app icon (bundled as a Tauri resource — see tauri.conf.json's
-/// `bundle.resources` — so it sits next to the installed exe). `tauri dev`/`cargo run`
-/// don't copy bundle resources, so dev builds fall back to the source icon directly.
+/// The app icon, registered as the AUMID's `IconUri` (shown in the toast's header next to
+/// "TwitchTrack", and as the toast's main image when there's no streamer avatar). Bundled
+/// as a Tauri resource — see tauri.conf.json's `bundle.resources` — so it sits next to
+/// the installed exe. `tauri dev`/`cargo run` don't copy bundle resources, so dev builds
+/// fall back to the source icon directly.
 #[cfg(windows)]
-fn windows_toast_icon_path(app: &AppHandle) -> Option<std::path::PathBuf> {
+fn windows_toast_icon_path(app: &AppHandle) -> Option<PathBuf> {
     use tauri::path::BaseDirectory;
     if let Ok(path) = app.path().resolve("notification-icon.png", BaseDirectory::Resource) {
         if path.exists() {
-            return Some(path);
+            return Some(without_verbatim_prefix(path));
         }
     }
-    let dev_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("icons/128x128.png");
+    let dev_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("icons/128x128.png");
     dev_path.exists().then_some(dev_path)
+}
+
+/// Tauri resolves resource paths in Windows' verbatim form (`\\?\C:\...`). The shell
+/// can't load an `IconUri` written that way and silently shows no header icon at all.
+#[cfg(windows)]
+fn without_verbatim_prefix(path: PathBuf) -> PathBuf {
+    let s = path.to_string_lossy();
+    if let Some(unc) = s.strip_prefix(r"\\?\UNC\") {
+        PathBuf::from(format!(r"\\{unc}"))
+    } else if let Some(local) = s.strip_prefix(r"\\?\") {
+        PathBuf::from(local)
+    } else {
+        path
+    }
 }
 
 #[cfg(windows)]
@@ -532,9 +620,10 @@ fn send_windows_toast(
     title: &str,
     body: &str,
     url: Option<&str>,
+    avatar: Option<&Path>,
 ) -> winrt_toast::Result<()> {
     use std::sync::Once;
-    use winrt_toast::content::image::ImagePlacement;
+    use winrt_toast::content::image::{ImageHintCrop, ImagePlacement};
     use winrt_toast::{Image, Toast, ToastManager};
 
     let icon_path = windows_toast_icon_path(app);
@@ -555,10 +644,15 @@ fn send_windows_toast(
     if let Some(url) = url {
         toast.launch(url);
     }
-    if let Some(icon_path) = &icon_path {
-        if let Ok(image) = Image::new_local(icon_path) {
-            toast.image(1, image.with_placement(ImagePlacement::AppLogoOverride));
-        }
+    // The streamer's avatar, circle-cropped like a profile picture, when we have one —
+    // otherwise the app icon.
+    let logo = match (avatar, &icon_path) {
+        (Some(avatar), _) => Image::new_local(avatar).ok().map(|i| i.with_hint_crop(ImageHintCrop::Circle)),
+        (None, Some(icon_path)) => Image::new_local(icon_path).ok(),
+        (None, None) => None,
+    };
+    if let Some(image) = logo {
+        toast.image(1, image.with_placement(ImagePlacement::AppLogoOverride));
     }
 
     let app = app.clone();
