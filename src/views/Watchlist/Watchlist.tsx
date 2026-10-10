@@ -38,6 +38,15 @@ function sortExactMatchFirst(results: ChannelSearchResult[], query: string): Cha
   return [...results.filter(isExact), ...results.filter((r) => !isExact(r))];
 }
 
+// Keyboard activation for the div-based clickable regions (thumbnail, avatar + name),
+// matching what a native <button> does on Enter/Space.
+function onActivateKey(e: React.KeyboardEvent, activate: () => void) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    activate();
+  }
+}
+
 interface WatchlistProps {
   canSearch: boolean;
   onStreamerAdded: () => void;
@@ -228,7 +237,14 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
                   else rowRefs.current.delete(s.user_id);
                 }}
               >
-                <div className="thumb">
+                <div
+                  className="thumb"
+                  role="button"
+                  tabIndex={0}
+                  title="Open stream"
+                  onClick={() => openStream(s.user_id, s.login)}
+                  onKeyDown={(e) => onActivateKey(e, () => openStream(s.user_id, s.login))}
+                >
                   {s.stream_thumbnail_url && (
                     <img
                       src={s.stream_thumbnail_url}
@@ -250,10 +266,16 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
                 </div>
                 <div className="row-main">
                   <div className="row-top">
-                    <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} small />
-                    <button className="name-btn" onClick={() => openStream(s.user_id, s.login)}>
-                      {s.display_name}
-                    </button>
+                    <div
+                      className="streamer-link"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openStream(s.user_id, s.login)}
+                      onKeyDown={(e) => onActivateKey(e, () => openStream(s.user_id, s.login))}
+                    >
+                      <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} small />
+                      <span className="streamer-name">{s.display_name}</span>
+                    </div>
                     <button className="open-btn" onClick={() => openStream(s.user_id, s.login)} title="Open stream">
                       <ArrowUpRightIcon size={12} />
                     </button>
@@ -307,10 +329,16 @@ export function Watchlist({ canSearch, onStreamerAdded, highlightUserId, refresh
                 else rowRefs.current.delete(s.user_id);
               }}
             >
-              <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} dim />
-              <button className="name-btn name-btn--muted" onClick={() => openStream(s.user_id, s.login)}>
-                {s.display_name}
-              </button>
+              <div
+                className="streamer-link streamer-link--muted"
+                role="button"
+                tabIndex={0}
+                onClick={() => openStream(s.user_id, s.login)}
+                onKeyDown={(e) => onActivateKey(e, () => openStream(s.user_id, s.login))}
+              >
+                <Avatar userId={s.user_id} displayName={s.display_name} imageUrl={s.profile_image_url} dim />
+                <span className="streamer-name">{s.display_name}</span>
+              </div>
               <button className="open-btn open-btn--faint" onClick={() => openStream(s.user_id, s.login)} title="Open channel">
                 <ArrowUpRightIcon size={11} />
               </button>

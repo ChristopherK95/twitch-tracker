@@ -163,6 +163,7 @@
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+  cursor: pointer;
   background: radial-gradient(
     120% 140% at 20% 0%,
     color-mix(in srgb, var(--accent) 35%, var(--surface-3)),
@@ -174,6 +175,13 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 55%);
+}
+.watchlist .thumb:hover .thumb-img {
+  filter: brightness(1.12);
+}
+.watchlist .thumb:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .watchlist .thumb-img {
   position: absolute;
@@ -264,25 +272,34 @@
   gap: 9px;
   flex-wrap: wrap;
 }
-.watchlist .name-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
+.watchlist .streamer-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.watchlist .streamer-link--muted {
+  gap: 12px;
+}
+.watchlist .streamer-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.watchlist .streamer-name {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: -0.01em;
   color: var(--text-high);
-  cursor: pointer;
-  text-align: left;
 }
-.watchlist .name-btn:hover {
-  color: var(--accent);
-}
-.watchlist .name-btn--muted {
+.watchlist .streamer-link--muted .streamer-name {
   font-size: 0.94rem;
   color: var(--text-muted);
+}
+.watchlist .streamer-link:hover .streamer-name {
+  color: var(--accent);
 }
 .watchlist .open-btn {
   background: none;
